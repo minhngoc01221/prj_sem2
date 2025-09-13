@@ -1,0 +1,140 @@
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 50px;
+  background-color: #fff;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+/* tránh navbar che nội dung */
+body {
+  padding-top: 80px;
+}
+
+.logo {
+  font-size: 26px;
+  font-weight: bold;
+}
+
+.logo-link {
+  text-decoration: none;
+  color: #333;
+}
+
+.logo-highlight {
+  color: #f8b400;
+}
+
+/* ===== MENU ===== */
+.navbar nav ul {
+  display: flex;
+  gap: 35px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar nav ul li {
+  display: flex;
+  align-items: center;
+}
+
+.navbar nav ul li a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  font-size: 18px;
+}
+
+.navbar nav ul li a:hover {
+  color: #f8b400;
+}
+
+/* ===== AUTH BUTTONS ===== */
+.auth-link {
+  padding: 8px 16px;
+  border: 1px solid #f8b400;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.auth-link.login {
+  background: #fff;
+  color: #f8b400;
+}
+.auth-link.login:hover {
+  background: #f8b400;
+  color: #fff;
+}
+
+.auth-link.register {
+  background: #f8b400;
+  color: #fff;
+}
+.auth-link.register:hover {
+  background: #d99900;
+}
+
+/* ===== LOGOUT BUTTON ===== */
+.btn-logout {
+  padding: 8px 16px;
+  background: #f8b400;
+  color: #fff !important;
+  font-size: 16px;
+  font-weight: 700;
+  border: 1px solid #f8b400;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform .15s ease, background-color .2s ease;
+}
+.btn-logout:hover {
+  background: #d99900;
+  transform: translateY(-1px);
+}
+
+/* ===== CART BADGE ===== */
+.cart-link-wrapper {
+  position: relative;
+}
+.cart-badge {
+  position: absolute;
+  top: -8px;
+  right: -14px;
+  background: #f8b400;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 50%;
+  padding: 2px 6px;
+  line-height: 1;
+  min-width: 18px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 15px 20px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .navbar nav ul {
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+  }
+
+  .navbar nav ul li a {
+    font-size: 16px;
+  }
+}
+

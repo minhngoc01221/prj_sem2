@@ -1,0 +1,165 @@
+.cart-page {
+  display: flex;
+  gap: 30px;
+  padding: 50px 6vw;
+  background: #fff;
+  color: #333;
+}
+
+/* ==== LEFT: Cart list ==== */
+.cart-left {
+  flex: 2;
+}
+
+.cart-left h2 {
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 20px;
+  color: #111;
+}
+
+.cart-left table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cart-left th,
+.cart-left td {
+  padding: 14px;
+  border-bottom: 1px solid #eee;
+  text-align: center;
+}
+
+.cart-left th {
+  font-weight: 700;
+  color: #444;
+  text-transform: uppercase;
+  font-size: 14px;
+}
+
+.cart-left td {
+  font-size: 14px;
+}
+
+.cart-img {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  margin-right: 12px;
+  vertical-align: middle;
+}
+
+.cart-left td div {
+  display: inline-block;
+  vertical-align: middle;
+  font-weight: 600;
+  color: #111;
+}
+
+.cart-left button {
+  border: none;
+  background: none;
+  color: #f44336;
+  font-size: 13px;
+  cursor: pointer;
+  margin-top: 6px;
+}
+
+.cart-left button:hover {
+  text-decoration: underline;
+}
+
+.cart-left td span {
+  margin: 0 10px;
+  font-weight: 600;
+}
+
+.cart-left td button {
+  background: #f8b400;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  margin: 0 2px;
+}
+
+.cart-left td button:hover {
+  background: #e0a800;
+}
+
+/* ==== RIGHT: Order summary ==== */
+.cart-right {
+  flex: 1;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 24px;
+  background: #fafafa;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  height: fit-content;
+}
+
+.cart-right h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 18px;
+  color: #111;
+}
+
+.cart-right p {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #444;
+}
+
+.cart-right input {
+  width: 100%;
+  padding: 10px 14px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.btn-apply {
+  width: 100%;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid #f8b400;
+  color: #f8b400;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 12px;
+  transition: all 0.2s ease;
+}
+
+.btn-apply:hover {
+  background: #f8b400;
+  color: #fff;
+}
+
+.btn-checkout {
+  width: 100%;
+  padding: 12px;
+  background: #f8b400;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-checkout:hover {
+  background: #e0a800;
+}
+
+/* ==== Responsive ==== */
+@media (max-width: 900px) {
+  .cart-page {
+    flex-direction: column;
+  }
+}

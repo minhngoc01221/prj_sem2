@@ -1,0 +1,50 @@
+.payment-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+  background: #fff;
+  color: #333;
+  text-align: center;
+}
+
+/* Icon dấu tích */
+.payment-success .success-icon {
+  font-size: 60px;
+  color: #4caf50; /* xanh lá */
+  margin-bottom: 20px;
+}
+
+/* Tiêu đề */
+.payment-success .success-text {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 10px;
+  color: #4caf50; /* chữ xanh lá */
+}
+
+/* Mô tả */
+.payment-success p {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 30px;
+}
+
+/* Nút Back */
+.payment-success .btn-back {
+  padding: 12px 28px;
+  background: #f8b400; /* vàng chủ đạo */
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.payment-success .btn-back:hover {
+  background: #e0a800;
+  transform: translateY(-1px);
+}

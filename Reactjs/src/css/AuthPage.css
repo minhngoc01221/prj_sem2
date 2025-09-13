@@ -1,0 +1,182 @@
+/* ========== BASE / GLOBAL ========== */
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  color: #111;
+  background: #fff;
+}
+
+/* ========== AUTH LAYOUT (LOGIN + REGISTER) ========== */
+.register-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr; /* trái: ảnh, phải: form */
+  background: #fff;
+}
+
+/* Left: background image */
+.register-hero {
+  position: relative;
+  min-height: 100vh;
+}
+.register-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(0,0,0,0.35) 0%,
+    rgba(0,0,0,0.25) 40%,
+    rgba(0,0,0,0.05) 100%
+  );
+}
+
+/* Right: form panel */
+.register-panel {
+  display: grid;
+  place-items: center;
+  padding: 40px 28px;
+  background: #fff;
+}
+.register-panel-inner {
+  width: 100%;
+  max-width: 520px;
+}
+.register-title {
+  margin: 0 0 20px;
+  font-size: 34px;
+  font-weight: 800;
+  color: #111;
+  text-align: left;
+}
+
+/* Form chung */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.auth-label {
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: #666;
+  margin-bottom: -12px;
+  text-transform: uppercase;
+}
+
+/* Input gạch chân */
+.line-input {
+  border: none;
+  border-bottom: 2px solid #e6e6e6;
+  padding: 10px 0 12px;
+  background: transparent;
+  font-size: 16px;
+  color: #111;
+  outline: none;
+  transition: border-color .2s ease;
+}
+.line-input::placeholder { color: #bfbfbf; }
+.line-input:focus {
+  border-bottom-color: #f8b400;
+  box-shadow: none;
+}
+
+/* Checkbox & extra options */
+.aux-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+.forgot-link {
+  color: #777;
+  text-decoration: none;
+}
+.forgot-link:hover { text-decoration: underline; }
+
+.remember {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #555;
+}
+.remember input { accent-color: #f8b400; }
+
+/* Role select */
+.role-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 14px;
+  color: #555;
+}
+.role-label { white-space: nowrap; }
+.role-row select {
+  margin-left: auto;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fff;
+  transition: all .25s;
+  font-size: 14px;
+}
+.role-row select:focus {
+  border-color: #f8b400;
+  outline: none;
+  box-shadow: 0 0 5px rgba(248,180,0,.45);
+}
+
+/* Agree row (register only) */
+.agree-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #777;
+  font-size: 14px;
+}
+.agree-row input { accent-color: #f8b400; }
+.agree-row a {
+  color: #111;
+  font-weight: 700;
+  text-decoration: none;
+}
+.agree-row a:hover { text-decoration: underline; }
+
+/* Buttons & links */
+.btn-register {
+  padding: 12px 24px;
+  background-color: #f8b400;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform .15s ease, background-color .2s ease, box-shadow .2s ease;
+}
+.btn-register:hover {
+  background-color: #e0a800;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(248,180,0,.35);
+}
+
+.register-actions {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.signin-link {
+  margin-left: auto;
+  color: #333;
+  font-weight: 600;
+  text-decoration: none;
+}
+.signin-link:hover { text-decoration: underline; }
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .register-page { grid-template-columns: 1fr; }
+  .register-hero { min-height: 40vh; }
+  .register-panel { padding-top: 20px; }
+}

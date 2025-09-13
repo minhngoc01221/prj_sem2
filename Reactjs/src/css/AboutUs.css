@@ -1,0 +1,161 @@
+/* Section wrapper */
+.aboutus {
+  position: relative;
+  background: #fff;
+  overflow: hidden;
+}
+
+/* Chevron background (xám nhạt + mũi tên vàng) */
+.aboutus::before,
+.aboutus::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.aboutus::before {
+  background:
+    linear-gradient(120deg, transparent 58%, rgba(0,0,0,0.03) 58%, rgba(0,0,0,0.03) 62%, transparent 62%) no-repeat,
+    linear-gradient(120deg, transparent 70%, rgba(0,0,0,0.05) 70%, rgba(0,0,0,0.05) 74%, transparent 74%) no-repeat;
+  background-size: 140% 100%, 140% 100%;
+  background-position: -10% 0, 10% 0;
+}
+.aboutus-inner::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%; /* chỉ cao đúng phần .aboutus-inner */
+  pointer-events: none;
+  background:
+    linear-gradient(120deg, transparent 0 60%, #f8b400 60% 64%, transparent 64%) no-repeat,
+    linear-gradient(120deg, transparent 0 66%, #f8b400 66% 70%, transparent 70%) no-repeat;
+  background-size: 45% 100%, 35% 100%;
+  background-position: 0 0, 7% 0;
+  opacity: .9;
+  z-index: 0;
+}
+
+/* Content row (2 cột) */
+.aboutus-inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr; /* trái rộng hơn một chút để chứa ảnh */
+  gap: 40px;
+  padding: 70px 8vw;
+  align-items: center;
+}
+
+
+/* ===== LEFT: chữ nền to + ảnh + tagline ===== */
+.aboutus-left {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.aboutus-bg-text {
+  font-size: 84px;
+  font-weight: 900;
+  color: rgba(0,0,0,0.06);
+  margin: 0;
+  line-height: 1;
+  position: absolute;
+  top: -10px;
+  left: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.aboutus-hero-img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 12px 28px rgba(0,0,0,.15);
+  margin-top: 36px; /* tránh đè chữ nền */
+}
+.aboutus-left .tagline {
+  margin: 18px 0 0;
+  color: #8a8a8a;
+  max-width: 520px;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  font-weight: 600;
+  z-index: 1;
+}
+
+/* ===== RIGHT: mô tả + nút ===== */
+.aboutus-right p {
+  color: #555;
+  line-height: 1.75;
+  margin: 0 0 18px;
+}
+.aboutus-right .more-text {
+  color: #555;
+  line-height: 1.75;
+  margin: 12px 0 18px;
+}
+.btn-primary {
+  display: inline-block;
+  background: #f8b400;
+  color: #fff;
+  border: 0;
+  padding: 12px 22px;
+  border-radius: 4px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform .15s ease, background-color .2s ease, box-shadow .2s ease;
+}
+.btn-primary:hover {
+  background: #e0a800;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(248,180,0,.35);
+}
+
+/* ===== Tiles row (4 cột) ===== */
+.aboutus-tiles {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+}
+.tile {
+  position: relative;
+  min-height: 240px;
+  background-size: cover;
+  background-position: center;
+  display: grid;
+  align-content: end;
+  padding: 28px;
+  color: #fff;
+}
+.tile-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(0deg, rgba(0,0,0,.55), rgba(0,0,0,.1));
+}
+.tile h3, .tile p { position: relative; margin: 0; }
+.tile h3 {
+  font-size: 20px;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+.tile p { color: #ddd; font-size: 14px; }
+
+/* ===== Responsive ===== */
+@media (max-width: 1200px) {
+  .aboutus-tiles { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 1024px) {
+  .aboutus-inner { grid-template-columns: 1fr; padding: 56px 6vw; }
+  .aboutus-bg-text { font-size: 56px; top: 0; }
+  .aboutus-hero-img { margin-top: 24px; max-width: 560px; }
+}
+@media (max-width: 640px) {
+  .aboutus-left { align-items: center; text-align: center; }
+  .aboutus-left .tagline { max-width: 560px; }
+  .aboutus-tiles { grid-template-columns: 1fr; }
+  .tile { min-height: 200px; }
+}
