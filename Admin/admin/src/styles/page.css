@@ -1,0 +1,32 @@
+
+/* page.css */
+.page-wrapper{display:flex;flex-direction:column;gap:16px}
+.page-title{margin:0 0 8px 0;color:#0f172a}
+.cards-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.card{border-radius:12px;padding:18px}
+.card small{color:#64748b}
+.card-value{font-size:20px;font-weight:700;margin-top:8px}
+.charts-row{display:flex;gap:12px}
+.chart-large{flex:2;background:white;border-radius:12px;padding:20px;min-height:220px;display:flex;align-items:center;justify-content:center}
+.chart-small{flex:1;background:white;border-radius:12px;padding:20px;min-height:220px;display:flex;align-items:center;justify-content:center}
+.dashboard-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.widget{background:white;padding:18px;border-radius:12px}
+.filter-bar{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+.filter-bar input{padding:10px;border-radius:8px;border:1px solid #e6eef8}
+.filter-bar select{padding:10px;border-radius:8px;border:1px solid #e6eef8}
+.btn{padding:8px 12px;border-radius:8px;border:1px solid rgba(15,23,42,0.06);background:#fff}
+.btn.primary{background:#2563eb;color:#fff;border:none}
+.btn.warning{background:#f97316;color:#fff;border:none}
+.btn.small{padding:6px 8px;font-size:13px;margin-left:6px}
+.card-table .table-row{display:flex;align-items:center;padding:10px;border-bottom:1px solid #f1f5f9}
+.card-table .table-row.header{background:#f8fafc;font-weight:700}
+.card-table .cell{flex:1}
+.table-row:hover{background:linear-gradient(90deg, rgba(37,99,235,0.04), rgba(249,115,22,0.02))}
+.badge{padding:6px 8px;border-radius:999px;font-weight:600}
+.badge.active{background:#bbf7d0;color:#166534}
+.badge.inactive{background:#fecaca;color:#7f1d1d}
+.settings-card{padding:20px;background:white;border-radius:12px}
+.form-row{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.form-row label{font-weight:600}
+.form-row input{padding:10px;border-radius:8px;border:1px solid #e6eef8}
+.form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
