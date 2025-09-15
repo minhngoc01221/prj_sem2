@@ -9,13 +9,14 @@ return new class extends Migration {
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id')->nullable(); // id của khách hàng
-            $table->decimal('total', 10, 2)->default(0);
-            $table->string('status')->default('pending'); // pending, completed, canceled
+            $table->string('customer');          // Tên khách hàng
+            $table->string('email')->nullable(); // Email khách hàng
+            $table->string('phone')->nullable(); // Số điện thoại
+            $table->string('address')->nullable(); // Địa chỉ giao hàng
+            $table->decimal('total', 10, 2);
+            $table->enum('status', ['Processing', 'Fulfilled', 'Cancelled'])->default('Processing');
+            $table->string('payment')->default('COD'); // Payment method
             $table->timestamps();
-
-            // nếu có bảng users
-            // $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

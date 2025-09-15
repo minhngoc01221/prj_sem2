@@ -1,28 +1,30 @@
+// src/pages/ProductsPage.jsx
 import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import "../css/ProductsPage.css";
 import { CartContext } from "../context/CartContext";
 
-const API_URL = "http://localhost/construction_store/api/products.php";
-
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 20;
 
   const navigate = useNavigate();
   const { addToCart } = useContext(CartContext);
 
+  // Lấy danh sách sản phẩm từ API (đồng bộ với trang admin)
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch(API_URL);
+        const res = await fetch("http://localhost:8000/api/products");
         if (!res.ok) throw new Error("Failed to fetch products");
         const data = await res.json();
-        setProducts(data);
+        setProducts(data.data || []); // ✅ giống trang admin
       } catch (err) {
         console.error("Error fetching products:", err);
+        setError("Không thể tải sản phẩm. Vui lòng thử lại sau.");
       } finally {
         setLoading(false);
       }
@@ -32,6 +34,9 @@ const ProductsPage = () => {
   }, []);
 
   if (loading) return <p className="loading">Loading products...</p>;
+  if (error) return <p className="error">{error}</p>;
+  if (!products.length)
+    return <p className="no-products">Không có sản phẩm nào để hiển thị.</p>;
 
   // Pagination
   const totalPages = Math.ceil(products.length / productsPerPage);
@@ -57,17 +62,22 @@ const ProductsPage = () => {
       <div className="products-grid">
         {currentProducts.map((p) => (
           <div key={p.id} className="product-card">
-            <div
-              className="product-img"
-              style={{ backgroundImage: `url(${p.image})` }}
-            />
+            {/* Hiển thị ảnh thumbnail (đồng bộ với trang admin) */}
+            <div className="product-img">
+              {p.thumbnail ? (
+                <img src={p.thumbnail} alt={p.name} loading="lazy" />
+              ) : (
+                <div className="no-img">No Image</div>
+              )}
+            </div>
+
             <h3>{p.name}</h3>
             <div className="product-rating">
-              {"★".repeat(p.rating)}{"☆".repeat(5 - p.rating)}
+              {"★".repeat(p.rating || 0)}
+              {"☆".repeat(5 - (p.rating || 0))}
             </div>
             <p className="product-price">${Number(p.price).toFixed(2)}</p>
 
-            {/* 2 nút Add + Review */}
             <div className="product-actions">
               <button className="btn-add" onClick={() => addToCart(p)}>
                 Add to Cart
@@ -88,7 +98,10 @@ const ProductsPage = () => {
         <button onClick={() => goToPage(1)} disabled={currentPage === 1}>
           &laquo;&laquo;
         </button>
-        <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>
+        <button
+          onClick={() => goToPage(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
           &laquo;
         </button>
         {[...Array(totalPages)].map((_, idx) => {

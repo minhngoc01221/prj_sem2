@@ -1,51 +1,134 @@
-import React from 'react';
-import '../styles/page.css';
+import React, { useEffect, useState } from "react";
+import "../pages/Orders.css";
 
-export default function Orders(){
-  const orders = new Array(8).fill(0).map((_,i)=>({
-    id: '#'+(500+i),
-    customer: 'Customer '+(i+1),
-    date: '02/09/2025',
-    payment: i%2===0 ? 'Paid' : 'Pending',
-    status: i%3===0 ? 'Fulfilled' : 'Processing',
-    total: '$'+(50+i*10)
-  }));
+const Orders = () => {
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
+  const fetchOrders = async () => {
+    try {
+      const res = await fetch("http://localhost:8000/api/orders");
+      if (!res.ok) throw new Error("Không thể tải đơn hàng");
+      const data = await res.json();
+      setOrders(data.data || []);
+    } catch (err) {
+      console.error("Error fetching orders:", err);
+      setError("Không thể tải danh sách đơn hàng");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      const res = await fetch(`http://localhost:8000/api/orders/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!res.ok) throw new Error("Không thể cập nhật trạng thái");
+
+      setOrders((prev) =>
+        prev.map((o) => (o.id === id ? { ...o, status: newStatus } : o))
+      );
+    } catch (err) {
+      console.error("Error updating status:", err);
+      alert("Lỗi khi cập nhật trạng thái đơn hàng");
+    }
+  };
+
+  const filteredOrders = orders.filter((o) => {
+    const matchSearch =
+      o.customer?.toLowerCase().includes(search.toLowerCase()) ||
+      String(o.id).includes(search);
+    const matchStatus = statusFilter ? o.status === statusFilter : true;
+    return matchSearch && matchStatus;
+  });
+
+  if (loading) return <p>Đang tải đơn hàng...</p>;
+  if (error) return <p className="error">{error}</p>;
+
   return (
-    <div className="page-wrapper">
-      <h2 className="page-title">Orders</h2>
-      <div className="filter-bar">
-        <input placeholder="Search orders..." />
-        <select><option>All statuses</option></select>
-        <input type="date" />
-        <button className="btn">Clear</button>
-        <button className="btn primary">Bulk Action</button>
+    <div className="admin-orders">
+      <h2>Orders Management</h2>
+
+      {/* Bộ lọc */}
+      <div className="filters">
+        <input
+          type="text"
+          placeholder="Search by customer or ID..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="">All statuses</option>
+          <option value="Processing">Processing</option>
+          <option value="Fulfilled">Fulfilled</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+        <button onClick={() => setStatusFilter("")}>Clear</button>
       </div>
 
-      <div className="table card-table">
-        <div className="table-row header">
-          <div className="cell">Order ID</div>
-          <div className="cell">Customer</div>
-          <div className="cell">Date</div>
-          <div className="cell">Payment</div>
-          <div className="cell">Status</div>
-          <div className="cell">Total</div>
-          <div className="cell">Actions</div>
-        </div>
-        {orders.map((o,idx)=>(
-          <div className="table-row" key={o.id}>
-            <div className="cell">{o.id}</div>
-            <div className="cell">{o.customer}</div>
-            <div className="cell">{o.date}</div>
-            <div className="cell">{o.payment}</div>
-            <div className="cell">{o.status}</div>
-            <div className="cell">{o.total}</div>
-            <div className="cell">
-              <button className="btn small primary">View</button>
-              <button className="btn small warning">Edit</button>
-            </div>
-          </div>
-        ))}
-      </div>
+      {/* Bảng đơn hàng */}
+      {filteredOrders.length === 0 ? (
+        <p>Không tìm thấy đơn hàng phù hợp.</p>
+      ) : (
+        <table className="orders-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Date</th>
+              <th>Total</th>
+              <th>Payment</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredOrders.map((o) => (
+              <tr key={o.id}>
+                <td>#{o.id}</td>
+                <td>{o.customer}</td>
+                <td>{new Date(o.created_at).toLocaleDateString("vi-VN")}</td>
+                <td>{Number(o.total).toLocaleString("vi-VN")}₫</td>
+                <td>{o.payment || "COD"}</td>
+                <td>
+                  <select
+                    value={o.status}
+                    onChange={(e) => handleStatusChange(o.id, e.target.value)}
+                  >
+                    <option value="Processing">Processing</option>
+                    <option value="Fulfilled">Fulfilled</option>
+                    <option value="Cancelled">Cancelled</option>
+                  </select>
+                </td>
+                <td>
+                  <button
+                    className="btn-view"
+                    onClick={() => alert(JSON.stringify(o, null, 2))}
+                  >
+                    View
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
-}
+};
+
+export default Orders;

@@ -1,12 +1,49 @@
 import React, { useContext } from "react";
-import { useNavigate } from "react-router-dom"; // 👈 thêm import
+import { useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import "../css/CartPage.css";
 
 const CartPage = () => {
-  const { cart, removeFromCart, updateQuantity, totalItems, totalCost } =
+  const { cart, removeFromCart, updateQuantity, totalItems, totalCost, clearCart } =
     useContext(CartContext);
-  const navigate = useNavigate(); // 👈 hook điều hướng
+  const navigate = useNavigate();
+
+  // Hàm checkout: gửi dữ liệu giỏ hàng lên backend
+  const handleCheckout = async () => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      alert("Bạn cần đăng nhập để đặt hàng!");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:8000/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: parseInt(userId),
+          items: cart.map((item) => ({
+            id: item.id,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+          total: totalCost + 5,
+          payment: "COD",
+        }),
+      });
+
+      if (!res.ok) throw new Error("Không thể tạo đơn hàng");
+      const data = await res.json();
+      console.log("Order created:", data);
+
+      clearCart(); // Xóa giỏ hàng sau khi đặt hàng thành công
+      navigate("/payment-success"); // Điều hướng sang trang xác nhận
+    } catch (err) {
+      console.error("Checkout error:", err);
+      alert("Đặt hàng thất bại, vui lòng thử lại!");
+    }
+  };
 
   return (
     <section className="cart-page">
@@ -59,8 +96,9 @@ const CartPage = () => {
         </p>
         <input type="text" placeholder="Enter promo code" />
         <button className="btn-apply">Apply</button>
-        {/* 👇 Nút Checkout điều hướng sang trang Checkout */}
-        <button className="btn-checkout" onClick={() => navigate("/checkout")}>
+
+        {/* Nút Checkout sẽ gọi API thay vì chỉ điều hướng */}
+        <button className="btn-checkout" onClick={handleCheckout}>
           Proceed to Checkout
         </button>
       </div>

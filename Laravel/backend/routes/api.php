@@ -8,7 +8,7 @@ use App\Http\Controllers\Api\UserTransportController;
 use App\Http\Controllers\Api\SupplierController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ProductController;
-use App\Http\Controllers\Api\OrderController;
+
 use App\Http\Controllers\Api\OderDetailsController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\RetailController;
@@ -20,6 +20,19 @@ use App\Http\Controllers\Api\WarningController;
 use App\Http\Controllers\Api\ImagePostController;
 use App\Http\Controllers\Api\ImageExportController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\OrderController;
+
+Route::get('/orders', [OrderController::class, 'index']);
+Route::get('/orders/{id}', [OrderController::class, 'show']);
+Route::post('/orders', [OrderController::class, 'store']);
+Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus']);
+
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+
+Route::apiResource('users', UserController::class);
 
 // Dashboard
 Route::get('/dashboard', [DashboardController::class, 'index']);

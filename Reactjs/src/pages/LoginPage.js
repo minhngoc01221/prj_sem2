@@ -2,36 +2,63 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../css/AuthPage.css";
 
-const ADMIN_URL = process.env.REACT_APP_ADMIN_URL || "http://localhost:3001";
+const API_URL = "http://localhost:8000/api/login";
 
 const LoginPage = ({ setRole }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
-  const [role, setRoleSelect] = useState("customer");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setError("");
 
-    if (role === "admin") {
-      window.location.href = ADMIN_URL;
-      return;
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.message || "Login failed");
+      }
+
+      const data = await res.json();
+
+      // ✅ Lưu thông tin vào localStorage
+      localStorage.setItem("userId", data.id);
+      localStorage.setItem("userName", data.name);
+      localStorage.setItem("role", data.role);
+
+      if (remember) {
+        localStorage.setItem("remember", "true");
+      }
+
+      // ✅ Cập nhật role trong state App.js
+      setRole(data.role);
+
+      // ✅ Điều hướng theo role
+      if (data.role === "Owner" || data.role === "Admin") {
+        navigate("/admin"); // Trang admin dashboard
+      } else {
+        navigate("/"); // Trang chủ
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError(err.message);
     }
-
-    // customer login
-    setRole("customer");
-    if (remember) localStorage.setItem("role", "customer");
-    navigate("/");
   };
 
   return (
     <div className="register-page">
-      {/* Cột trái: ảnh nền */}
       <div
         className="register-hero"
         style={{
-          backgroundImage: "url(/image/LoginPage.jpeg)", // bạn thêm ảnh Login.jpg vào public/image
+          backgroundImage: "url(/image/LoginPage.jpeg)",
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
@@ -40,7 +67,6 @@ const LoginPage = ({ setRole }) => {
         <div className="register-hero-overlay" />
       </div>
 
-      {/* Cột phải: form */}
       <div className="register-panel">
         <div className="register-panel-inner">
           <h2 className="register-title">LOGIN</h2>
@@ -80,16 +106,7 @@ const LoginPage = ({ setRole }) => {
               </label>
             </div>
 
-            <div className="role-row">
-              <span className="role-label">Login as:</span>
-              <select
-                value={role}
-                onChange={(e) => setRoleSelect(e.target.value)}
-              >
-                <option value="customer">Customer</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
+            {error && <p className="error-text">{error}</p>}
 
             <div className="register-actions">
               <button type="submit" className="btn-register">

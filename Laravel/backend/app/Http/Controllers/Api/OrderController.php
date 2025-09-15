@@ -1,67 +1,89 @@
 <?php
 
 namespace App\Http\Controllers\Api;
+
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Models\OrderDetail;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class OderController extends Controller
+class OrderController extends Controller
 {
-    public function index(){ return response()->json(Order::with(['orderDetails.product','customer','transport'])->paginate(20)); }
+    // Lấy danh sách đơn hàng kèm user + chi tiết sản phẩm
+    public function index()
+    {
+        return response()->json(
+            Order::with(['user', 'items.product'])->latest()->paginate(20)
+        );
+    }
 
-    public function show($id){ return response()->json(Order::with(['orderDetails.product','customer'])->findOrFail($id)); }
+    // Lấy chi tiết một đơn hàng
+    public function show($id)
+    {
+        return response()->json(
+            Order::with(['user', 'items.product'])->findOrFail($id)
+        );
+    }
 
+    // Tạo đơn hàng mới
     public function store(Request $request)
     {
         $data = $request->validate([
-            'customer_id'=>'required|exists:user_customer,id',
-            'transport_id'=>'nullable|exists:user_transport,id',
-            'order_date'=>'required|date',
-            'status'=>'required|string',
-            'items'=>'required|array|min:1',
-            'items.*.product_id'=>'required|exists:products,id',
-            'items.*.quantity'=>'required|integer|min:1',
+            'user_id' => 'required|exists:users,id',
+            'payment' => 'nullable|string',
+            'status'  => 'nullable|string',
+            'items'   => 'required|array|min:1',
+            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.quantity'   => 'required|integer|min:1',
         ]);
 
         $order = null;
-        DB::transaction(function() use ($data, &$order) {
+
+        DB::transaction(function () use ($data, &$order) {
             $order = Order::create([
-                'customer_id'=>$data['customer_id'],
-                'transport_id'=>$data['transport_id'] ?? null,
-                'order_date'=>$data['order_date'],
-                'total'=>0,
-                'status'=>$data['status'],
+                'user_id' => $data['user_id'],
+                'total'   => 0,
+                'status'  => $data['status'] ?? 'Processing',
+                'payment' => $data['payment'] ?? 'COD',
             ]);
 
             $total = 0;
+
             foreach ($data['items'] as $it) {
                 $product = Product::findOrFail($it['product_id']);
                 $linePrice = ($product->price ?? 0) * $it['quantity'];
-                $order->orderDetails()->create([
-                    'product_id'=>$product->id,
-                    'quantity'=>$it['quantity'],
-                    'price'=>$linePrice,
+
+                // Tạo chi tiết đơn hàng
+                $order->items()->create([
+                    'product_id' => $product->id,
+                    'quantity'   => $it['quantity'],
+                    'price'      => $linePrice,
                 ]);
-                // reduce stock
+
+                // Giảm tồn kho sản phẩm
                 $product->stock = max(0, ($product->stock ?? 0) - $it['quantity']);
                 $product->save();
+
                 $total += $linePrice;
             }
-            $order->update(['total'=>$total]);
+
+            $order->update(['total' => $total]);
         });
 
-        return response()->json($order->load('orderDetails.product'),201);
+        return response()->json(
+            $order->load(['user', 'items.product']),
+            201
+        );
     }
 
+    // Cập nhật trạng thái đơn hàng
     public function updateStatus(Request $request, $id)
     {
+        $request->validate(['status' => 'required|string']);
         $order = Order::findOrFail($id);
-        $request->validate(['status'=>'required|string']);
-        $order->status = $request->status;
-        $order->save();
+        $order->update(['status' => $request->status]);
+
         return response()->json($order);
     }
 }
