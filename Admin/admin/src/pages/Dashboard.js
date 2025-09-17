@@ -1,79 +1,69 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
+import { Bar } from "react-chartjs-2";
+import "chart.js/auto";
+import "../styles/dashboard.css";
 
+const Dashboard = () => {
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-function DashboardPage() {
-  const [stats, setStats] = useState({
-    conversion: 0,
-    revenue: 0,
-    orders: 0,
-    customers: 0,
-  });
-  const [salesData, setSalesData] = useState([]);
-  const [topProducts, setTopProducts] = useState([]);
-  const [recentOrders, setRecentOrders] = useState([]);
+  // Hàm fetch dữ liệu
+  const fetchStats = () => {
+    fetch("http://localhost:8000/api/dashboard")
+      .then((res) => res.json())
+      .then((data) => {
+        setStats(data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  };
 
   useEffect(() => {
-    // Gọi API backend để lấy dữ liệu dashboard
-    axios.get("http://localhost:8000/api/dashboard")
-      .then(res => {
-        setStats(res.data.stats);
-        setSalesData(res.data.sales);
-        setTopProducts(res.data.topProducts);
-        setRecentOrders(res.data.recentOrders);
-      })
-      .catch(err => console.error(err));
+    fetchStats(); // gọi lần đầu
+
+    // Tự động refresh mỗi 15 giây
+    const interval = setInterval(fetchStats, 15000);
+
+    // Dọn dẹp khi component unmount
+    return () => clearInterval(interval);
   }, []);
 
+  if (loading) return <p>Đang tải dữ liệu...</p>;
+  if (!stats) return <p>Lỗi khi tải dữ liệu</p>;
+
+  const chartData = {
+    labels: stats.topProducts.map((p) => p.name),
+    datasets: [
+      {
+        label: "Revenue",
+        data: stats.topProducts.map((p) => p.revenue),
+        backgroundColor: "rgba(75,192,192,0.6)",
+      },
+    ],
+  };
+
   return (
-    <div className="dashboard-container">
-      {/* Thống kê nhanh */}
-      <div className="stats-cards">
-        <div className="card">Conversion <br /> {stats.conversion}%</div>
-        <div className="card">Total Revenue <br /> ${stats.revenue}</div>
-        <div className="card">Orders <br /> {stats.orders}</div>
-        <div className="card">Customers <br /> {stats.customers}</div>
+    <div className="dashboard">
+      <div className="cards">
+        <div className="card revenue">
+          <h4>Total Revenue</h4>
+          <p>${Number(stats.totalRevenue).toFixed(2)}</p>
+        </div>
+        <div className="card orders">
+          <h4>Orders</h4>
+          <p>{stats.totalOrders}</p>
+        </div>
+        <div className="card customers">
+          <h4>Customers</h4>
+          <p>{stats.totalCustomers}</p>
+        </div>
       </div>
 
-      {/* Sales Overview (biểu đồ) */}
       <div className="chart-section">
-        <h3>Sales Overview</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={salesData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="sales" fill="#8884d8" />
-          </BarChart>
-        </ResponsiveContainer>
+        <h3 className="chart-title">Top Products</h3>
+        <Bar data={chartData} />
       </div>
 
-      {/* Top Products */}
-      <div className="top-products">
-        <h3>Top Products</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Product Name</th>
-              <th>Revenue</th>
-              <th>Thumbnail</th>
-            </tr>
-          </thead>
-          <tbody>
-            {topProducts.map((p, idx) => (
-              <tr key={idx}>
-                <td>{p.name}</td>
-                <td>${p.revenue}</td>
-                <td><img src={p.thumbnail} alt={p.name} width="50" /></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Recent Orders */}
       <div className="recent-orders">
         <h3>Recent Orders</h3>
         <table>
@@ -84,18 +74,16 @@ function DashboardPage() {
               <th>Date</th>
               <th>Amount</th>
               <th>Status</th>
-              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {recentOrders.map((o, idx) => (
-              <tr key={idx}>
-                <td>{o.id}</td>
-                <td>{o.customer}</td>
-                <td>{o.date}</td>
-                <td>${o.amount}</td>
+            {stats.recentOrders.map((o) => (
+              <tr key={o.id}>
+                <td>#{o.id}</td>
+                <td>{o.user?.name || "Guest"}</td>
+                <td>{new Date(o.created_at).toLocaleDateString()}</td>
+                <td>${Number(o.total).toFixed(2)}</td>
                 <td>{o.status}</td>
-                <td><button>View</button></td>
               </tr>
             ))}
           </tbody>
@@ -103,6 +91,6 @@ function DashboardPage() {
       </div>
     </div>
   );
-}
+};
 
-export default DashboardPage;
+export default Dashboard;

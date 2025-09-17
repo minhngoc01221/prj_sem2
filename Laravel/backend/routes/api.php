@@ -19,10 +19,13 @@ use App\Http\Controllers\Api\MonitorController;
 use App\Http\Controllers\Api\WarningController;
 use App\Http\Controllers\Api\ImagePostController;
 use App\Http\Controllers\Api\ImageExportController;
-use App\Http\Controllers\Api\DashboardController;
+
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\DashboardController;
+
+Route::get('/dashboard', [DashboardController::class, 'stats']);
 
 Route::get('/orders', [OrderController::class, 'index']);
 Route::get('/orders/{id}', [OrderController::class, 'show']);
@@ -35,7 +38,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::apiResource('users', UserController::class);
 
 // Dashboard
-Route::get('/dashboard', [DashboardController::class, 'index']);
+
 
 // RESTful API resources
 Route::apiResource('admin', AdminController::class);

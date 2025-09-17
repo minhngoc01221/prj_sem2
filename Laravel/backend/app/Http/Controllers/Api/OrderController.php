@@ -41,6 +41,7 @@ class OrderController extends Controller
         $order = null;
 
         DB::transaction(function () use ($data, &$order) {
+            // ✅ Tạo đơn hàng với tổng ban đầu = 0
             $order = Order::create([
                 'user_id' => $data['user_id'],
                 'total'   => 0,
@@ -54,21 +55,22 @@ class OrderController extends Controller
                 $product = Product::findOrFail($it['product_id']);
                 $linePrice = ($product->price ?? 0) * $it['quantity'];
 
-                // Tạo chi tiết đơn hàng
+                // ✅ Lưu chi tiết từng sản phẩm
                 $order->items()->create([
                     'product_id' => $product->id,
                     'quantity'   => $it['quantity'],
                     'price'      => $linePrice,
                 ]);
 
-                // Giảm tồn kho sản phẩm
+                // ✅ Giảm tồn kho
                 $product->stock = max(0, ($product->stock ?? 0) - $it['quantity']);
                 $product->save();
 
                 $total += $linePrice;
             }
 
-            $order->update(['total' => $total]);
+            // ✅ Cộng phí ship cố định 5 USD
+            $order->update(['total' => $total + 5]);
         });
 
         return response()->json(

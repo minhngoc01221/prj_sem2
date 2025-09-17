@@ -3,70 +3,41 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Order;
-use App\Models\Product;
-use App\Models\User;   // 👉 dùng bảng users
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function stats()
     {
-        // Thống kê nhanh
-        $conversion = 2.4; // giả sử tính toán
-        $revenue = Order::sum('total'); // tổng doanh thu
-        $orders = Order::count();       // tổng số đơn hàng
-        $customers = User::count();     // tổng số khách hàng (từ bảng users)
+        // Tổng số đơn hàng
+        $totalOrders = Order::count();
 
-        // Sales chart (theo tháng)
-        $sales = Order::select(
-                DB::raw('MONTH(created_at) as month'),
-                DB::raw('SUM(total) as sales')
-            )
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get()
-            ->map(function($item) {
-                return [
-                    'month' => date("M", mktime(0, 0, 0, $item->month, 1)),
-                    'sales' => $item->sales
-                ];
-            });
+        // Tổng doanh thu (đã bao gồm phí ship)
+        $totalRevenue = Order::sum('total');
 
-        // Top products
-        $topProducts = Product::select('products.name', 'products.thumbnail', DB::raw('SUM(order_items.quantity * order_items.price) as revenue'))
-            ->join('order_items', 'products.id', '=', 'order_items.product_id')
-            ->groupBy('products.id', 'products.name', 'products.thumbnail')
+        // Tổng số khách hàng (nếu user có cột role)
+        $totalCustomers = User::where('role', 'customer')->count();
+
+        // Top 5 sản phẩm bán chạy
+        $topProducts = DB::table('order_items')
+            ->join('products', 'order_items.product_id', '=', 'products.id')
+            ->selectRaw('products.name, SUM(order_items.quantity) as qty, SUM(order_items.price) as revenue')
+            ->groupBy('products.name')
             ->orderByDesc('revenue')
-            ->take(5)
+            ->limit(5)
             ->get();
 
-        // Recent Orders
-        $recentOrders = Order::with('customer')
-            ->orderByDesc('created_at')
-            ->take(5)
-            ->get()
-            ->map(function($order) {
-                return [
-                    'id' => $order->id,
-                    'customer' => $order->customer->name ?? 'Guest',
-                    'date' => $order->created_at->format('Y-m-d'),
-                    'amount' => $order->total,
-                    'status' => $order->status
-                ];
-            });
+        // Lấy 5 đơn hàng gần nhất
+        $recentOrders = Order::with('user')->latest()->take(5)->get();
 
         return response()->json([
-            'stats' => [
-                'conversion' => $conversion,
-                'revenue'    => $revenue,
-                'orders'     => $orders,
-                'customers'  => $customers,
-            ],
-            'sales'        => $sales,
-            'topProducts'  => $topProducts,
-            'recentOrders' => $recentOrders
+            'totalOrders'    => $totalOrders,
+            'totalRevenue'   => $totalRevenue,
+            'totalCustomers' => $totalCustomers,
+            'topProducts'    => $topProducts,
+            'recentOrders'   => $recentOrders,
         ]);
     }
 }

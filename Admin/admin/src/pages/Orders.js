@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "../pages/Orders.css";
+import styles from "../pages/Orders.module.css";
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -7,6 +7,7 @@ const Orders = () => {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   const fetchOrders = async () => {
     try {
@@ -46,8 +47,9 @@ const Orders = () => {
   };
 
   const filteredOrders = orders.filter((o) => {
+    const customerName = o.user?.name || o.customer || "";
     const matchSearch =
-      o.customer?.toLowerCase().includes(search.toLowerCase()) ||
+      customerName.toLowerCase().includes(search.toLowerCase()) ||
       String(o.id).includes(search);
     const matchStatus = statusFilter ? o.status === statusFilter : true;
     return matchSearch && matchStatus;
@@ -57,34 +59,41 @@ const Orders = () => {
   if (error) return <p className="error">{error}</p>;
 
   return (
-    <div className="admin-orders">
-      <h2>Orders Management</h2>
+    <div className={styles.wrapper}>
+      <h2 className={styles.title}>Orders Management</h2>
 
       {/* Bộ lọc */}
-      <div className="filters">
+      <div className={styles.filters}>
         <input
           type="text"
           placeholder="Search by customer or ID..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          className={styles.filterInput}
         />
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
+          className={styles.filterSelect}
         >
           <option value="">All statuses</option>
           <option value="Processing">Processing</option>
           <option value="Fulfilled">Fulfilled</option>
           <option value="Cancelled">Cancelled</option>
         </select>
-        <button onClick={() => setStatusFilter("")}>Clear</button>
+        <button
+          onClick={() => setStatusFilter("")}
+          className={styles.filterButton}
+        >
+          Clear
+        </button>
       </div>
 
       {/* Bảng đơn hàng */}
       {filteredOrders.length === 0 ? (
         <p>Không tìm thấy đơn hàng phù hợp.</p>
       ) : (
-        <table className="orders-table">
+        <table className={styles.table}>
           <thead>
             <tr>
               <th>Order ID</th>
@@ -100,14 +109,15 @@ const Orders = () => {
             {filteredOrders.map((o) => (
               <tr key={o.id}>
                 <td>#{o.id}</td>
-                <td>{o.customer}</td>
+                <td>{o.user?.name || o.customer || "Guest"}</td>
                 <td>{new Date(o.created_at).toLocaleDateString("vi-VN")}</td>
-                <td>{Number(o.total).toLocaleString("vi-VN")}₫</td>
+                <td>${Number(o.total).toFixed(2)}</td>
                 <td>{o.payment || "COD"}</td>
                 <td>
                   <select
                     value={o.status}
                     onChange={(e) => handleStatusChange(o.id, e.target.value)}
+                    className={styles.statusSelect}
                   >
                     <option value="Processing">Processing</option>
                     <option value="Fulfilled">Fulfilled</option>
@@ -116,8 +126,8 @@ const Orders = () => {
                 </td>
                 <td>
                   <button
-                    className="btn-view"
-                    onClick={() => alert(JSON.stringify(o, null, 2))}
+                    className={styles.viewButton}
+                    onClick={() => setSelectedOrder(o)}
                   >
                     View
                   </button>
@@ -126,6 +136,65 @@ const Orders = () => {
             ))}
           </tbody>
         </table>
+      )}
+
+      {/* Modal chi tiết đơn hàng */}
+      {selectedOrder && (
+        <div
+          className={styles.modalOverlay}
+          onClick={() => setSelectedOrder(null)}
+        >
+          <div
+            className={styles.modalBox}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3>Order #{selectedOrder.id}</h3>
+            <p>
+              <b>Customer:</b>{" "}
+              {selectedOrder.user?.name || selectedOrder.customer}
+            </p>
+            <p>
+              <b>Date:</b>{" "}
+              {new Date(selectedOrder.created_at).toLocaleString()}
+            </p>
+            <p>
+              <b>Payment:</b> {selectedOrder.payment}
+            </p>
+
+            <h4>Items</h4>
+            <table className={styles.itemsTable}>
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Qty</th>
+                  <th>Price</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedOrder.items?.map((it) => (
+                  <tr key={it.id}>
+                    <td>{it.product?.name}</td>
+                    <td>{it.quantity}</td>
+                    <td>${Number(it.price).toFixed(2)}</td>
+                    <td>
+                      ${(Number(it.price) * Number(it.quantity)).toFixed(2)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <h4 style={{ textAlign: "right", marginTop: "12px" }}>
+              Total:{" "}
+              <span style={{ color: "#16a34a" }}>
+                ${Number(selectedOrder.total).toFixed(2)}
+              </span>
+            </h4>
+
+            <button onClick={() => setSelectedOrder(null)}>Close</button>
+          </div>
+        </div>
       )}
     </div>
   );
