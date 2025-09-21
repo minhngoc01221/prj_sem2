@@ -1,25 +1,37 @@
-// src/pages/ProductDetail.jsx
 import React, { useEffect, useState, useContext } from "react";
 import { useParams } from "react-router-dom";
 import { FaTruck, FaDollarSign, FaHeadphones, FaWallet } from "react-icons/fa";
 import "../css/ProductDetail.css";
 import { CartContext } from "../context/CartContext";
 
-const API_URL = "http://localhost/construction_store/api/products.php";
+const fallbackImages = [
+  "/image/product1.jpg",
+  "/image/product2.jpg",
+  "/image/product3.jpg",
+  "/image/product4.jpg",
+  "/image/product5.jpg",
+  "/image/product6.jpg",
+];
 
 const ProductDetail = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
-
   const { addToCart } = useContext(CartContext);
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`${API_URL}?id=${id}`);
+        const res = await fetch(`http://localhost:8000/api/products/${id}`);
+        if (!res.ok) throw new Error("Failed to fetch product");
         const data = await res.json();
-        setProduct(data);
+
+        // ✅ Nếu không có thumbnail thì gán ảnh fallback
+        const randomImage =
+          data.thumbnail ||
+          fallbackImages[(parseInt(id, 10) - 1) % fallbackImages.length];
+
+        setProduct({ ...data, thumbnail: randomImage });
       } catch (err) {
         console.error("Error fetching product:", err);
       }
@@ -27,7 +39,7 @@ const ProductDetail = () => {
     fetchProduct();
   }, [id]);
 
-  if (!product) return <p>Loading...</p>;
+  if (!product) return <p className="loading">Loading product...</p>;
 
   const handleAddToCart = () => {
     addToCart(product, quantity);
@@ -38,10 +50,13 @@ const ProductDetail = () => {
       <section className="product-detail">
         {/* LEFT: hình ảnh */}
         <div className="detail-left">
-          <div
-            className="detail-img"
-            style={{ backgroundImage: `url(${product.image})` }}
-          ></div>
+          <div className="detail-img">
+            <img
+              src={product.thumbnail}
+              alt={product.name}
+              className="detail-main-img"
+            />
+          </div>
         </div>
 
         {/* RIGHT: thông tin */}
@@ -51,9 +66,8 @@ const ProductDetail = () => {
             ${Number(product.price).toFixed(2)} USD
           </p>
           <p className="detail-desc">
-            The chuck is the part of the drill that holds and secures the drill
-            bit. It is often adjustable to accommodate different sizes of drill
-            bits.
+            {product.description ||
+              "This is a high-quality building product trusted by professionals."}
           </p>
 
           <div className="detail-qty">
@@ -73,7 +87,7 @@ const ProductDetail = () => {
           <div className="detail-info">
             <h3>Product Info</h3>
             <ul>
-              <li>Available in stock</li>
+              <li>Available in stock: {product.stock ?? "N/A"}</li>
               <li>Secure packaging</li>
               <li>Non-returnable items</li>
             </ul>

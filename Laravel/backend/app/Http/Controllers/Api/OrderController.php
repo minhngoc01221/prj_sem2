@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
-    // Lấy danh sách đơn hàng kèm user + chi tiết sản phẩm
     public function index()
     {
         return response()->json(
@@ -18,7 +17,6 @@ class OrderController extends Controller
         );
     }
 
-    // Lấy chi tiết một đơn hàng
     public function show($id)
     {
         return response()->json(
@@ -26,7 +24,6 @@ class OrderController extends Controller
         );
     }
 
-    // Tạo đơn hàng mới
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -41,7 +38,6 @@ class OrderController extends Controller
         $order = null;
 
         DB::transaction(function () use ($data, &$order) {
-            // ✅ Tạo đơn hàng với tổng ban đầu = 0
             $order = Order::create([
                 'user_id' => $data['user_id'],
                 'total'   => 0,
@@ -55,21 +51,18 @@ class OrderController extends Controller
                 $product = Product::findOrFail($it['product_id']);
                 $linePrice = ($product->price ?? 0) * $it['quantity'];
 
-                // ✅ Lưu chi tiết từng sản phẩm
                 $order->items()->create([
                     'product_id' => $product->id,
                     'quantity'   => $it['quantity'],
                     'price'      => $linePrice,
                 ]);
 
-                // ✅ Giảm tồn kho
                 $product->stock = max(0, ($product->stock ?? 0) - $it['quantity']);
                 $product->save();
 
                 $total += $linePrice;
             }
 
-            // ✅ Cộng phí ship cố định 5 USD
             $order->update(['total' => $total + 5]);
         });
 
@@ -79,13 +72,30 @@ class OrderController extends Controller
         );
     }
 
-    // Cập nhật trạng thái đơn hàng
+    // ✅ Cập nhật trạng thái đơn hàng + trả dữ liệu dashboard mới
     public function updateStatus(Request $request, $id)
     {
         $request->validate(['status' => 'required|string']);
         $order = Order::findOrFail($id);
         $order->update(['status' => $request->status]);
 
-        return response()->json($order);
+        $todayStart = now()->startOfDay();
+        $todayEnd = now()->endOfDay();
+
+        $totalOrdersToday = Order::whereIn('status', ['Fulfilled', 'Processing'])
+            ->whereBetween('created_at', [$todayStart, $todayEnd])
+            ->count();
+
+        $totalRevenueToday = Order::whereIn('status', ['Fulfilled', 'Processing'])
+            ->whereBetween('created_at', [$todayStart, $todayEnd])
+            ->sum('total');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Order status updated successfully',
+            'order' => $order,
+            'totalOrdersToday' => $totalOrdersToday,
+            'totalRevenueToday' => $totalRevenueToday,
+        ]);
     }
 }

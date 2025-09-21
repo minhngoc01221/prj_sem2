@@ -24,6 +24,10 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\ReportsController;
+
+Route::get('/reports', [ReportsController::class, 'index']);
+
 
 Route::get('/dashboard', [DashboardController::class, 'stats']);
 

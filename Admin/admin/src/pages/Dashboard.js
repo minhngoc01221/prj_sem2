@@ -6,26 +6,48 @@ import "../styles/dashboard.css";
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Hàm fetch dữ liệu
-  const fetchStats = () => {
-    fetch("http://localhost:8000/api/dashboard")
-      .then((res) => res.json())
-      .then((data) => {
-        setStats(data);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+  const fetchStats = async () => {
+    try {
+      if (stats) setRefreshing(true);
+      const res = await fetch("http://localhost:8000/api/dashboard");
+      if (!res.ok) throw new Error("Lỗi tải dữ liệu Dashboard");
+      const data = await res.json();
+      setStats(data);
+    } catch (error) {
+      console.error("Fetch dashboard failed:", error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   };
 
   useEffect(() => {
-    fetchStats(); // gọi lần đầu
+    fetchStats();
 
-    // Tự động refresh mỗi 15 giây
     const interval = setInterval(fetchStats, 15000);
 
-    // Dọn dẹp khi component unmount
-    return () => clearInterval(interval);
+    const reloadListener = (e) => {
+      console.log("📥 Nhận sự kiện ordersUpdated:", e.detail);
+
+      if (e.detail?.change) {
+        setStats((prev) => ({
+          ...prev,
+          totalOrders: (prev?.totalOrders || 0) + e.detail.change,
+          totalRevenue: (prev?.totalRevenue || 0) + (e.detail.revenueChange || 0),
+        }));
+      }
+
+      fetchStats();
+    };
+
+    window.addEventListener("ordersUpdated", reloadListener);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("ordersUpdated", reloadListener);
+    };
   }, []);
 
   if (loading) return <p>Đang tải dữ liệu...</p>;
@@ -43,7 +65,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="dashboard">
+    <div className={`dashboard ${refreshing ? "refreshing" : ""}`}>
       <div className="cards">
         <div className="card revenue">
           <h4>Total Revenue</h4>
@@ -81,7 +103,7 @@ const Dashboard = () => {
               <tr key={o.id}>
                 <td>#{o.id}</td>
                 <td>{o.user?.name || "Guest"}</td>
-                <td>{new Date(o.created_at).toLocaleDateString()}</td>
+                <td>{new Date(o.created_at).toLocaleDateString("vi-VN")}</td>
                 <td>${Number(o.total).toFixed(2)}</td>
                 <td>{o.status}</td>
               </tr>
@@ -89,6 +111,8 @@ const Dashboard = () => {
           </tbody>
         </table>
       </div>
+
+      {refreshing && <div className="refresh-overlay">🔄 Đang cập nhật...</div>}
     </div>
   );
 };

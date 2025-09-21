@@ -1,8 +1,16 @@
-// src/pages/ProductsPage.jsx
 import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import "../css/ProductsPage.css";
 import { CartContext } from "../context/CartContext";
+
+const fallbackImages = [
+  "/image/product1.jpg",
+  "/image/product2.jpg",
+  "/image/product3.jpg",
+  "/image/product4.jpg",
+  "/image/product5.jpg",
+  "/image/product6.jpg",
+];
 
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
@@ -14,14 +22,21 @@ const ProductsPage = () => {
   const navigate = useNavigate();
   const { addToCart } = useContext(CartContext);
 
-  // Lấy danh sách sản phẩm từ API (đồng bộ với trang admin)
+  // Lấy danh sách sản phẩm từ API
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const res = await fetch("http://localhost:8000/api/products");
         if (!res.ok) throw new Error("Failed to fetch products");
         const data = await res.json();
-        setProducts(data.data || []); // ✅ giống trang admin
+
+        // ✅ Nếu sản phẩm không có thumbnail, tự gán ảnh có sẵn
+        const withImages = (data.data || []).map((p, idx) => ({
+          ...p,
+          thumbnail: p.thumbnail || fallbackImages[idx % fallbackImages.length],
+        }));
+
+        setProducts(withImages);
       } catch (err) {
         console.error("Error fetching products:", err);
         setError("Không thể tải sản phẩm. Vui lòng thử lại sau.");
@@ -62,13 +77,8 @@ const ProductsPage = () => {
       <div className="products-grid">
         {currentProducts.map((p) => (
           <div key={p.id} className="product-card">
-            {/* Hiển thị ảnh thumbnail (đồng bộ với trang admin) */}
             <div className="product-img">
-              {p.thumbnail ? (
-                <img src={p.thumbnail} alt={p.name} loading="lazy" />
-              ) : (
-                <div className="no-img">No Image</div>
-              )}
+              <img src={p.thumbnail} alt={p.name} loading="lazy" />
             </div>
 
             <h3>{p.name}</h3>

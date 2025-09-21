@@ -26,7 +26,7 @@
 /* Grid hiển thị sản phẩm */
 .products .products-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 4 sản phẩm 1 hàng */
+  grid-template-columns: repeat(4, 1fr);
   gap: 28px;
   margin-bottom: 30px;
 }
@@ -34,27 +34,41 @@
 .products .product-card {
   background: #fff;
   border: 1px solid #eee;
-  border-radius: 10px;
+  border-radius: 12px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-  padding: 18px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
   transition: transform .2s ease, box-shadow .2s ease;
 }
 .products .product-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.15);
 }
 
-/* Product image */
+/* Product image (đã chỉnh lại cho đẹp hơn) */
 .products .product-img {
   width: 100%;
-  height: 180px;
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
-  margin-bottom: 14px;
+  height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 12px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.products .product-img img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform 0.25s ease;
+}
+
+.products .product-card:hover .product-img img {
+  transform: scale(1.05);
 }
 
 /* Product name */
@@ -68,7 +82,7 @@
 /* Rating */
 .products .product-rating {
   font-size: 14px;
-  color: #f8b400; /* vàng chủ đạo */
+  color: #f8b400;
   margin-bottom: 6px;
 }
 
@@ -80,12 +94,12 @@
   margin: 6px 0 14px;
 }
 
-/* ===== Nút hành động ===== */
+/* Nút hành động */
 .products .product-actions {
   display: flex;
   justify-content: center;
   gap: 12px;
-  margin-top: 10px;
+  margin-top: auto;
   width: 100%;
 }
 
@@ -109,6 +123,7 @@
 }
 .products .btn-add:hover {
   background: #e0a800;
+  transform: scale(1.05);
 }
 
 /* Review */
@@ -120,9 +135,10 @@
 .products .btn-review:hover {
   background: #f8b400;
   color: #fff;
+  transform: scale(1.05);
 }
 
-/* ===== Pagination ===== */
+/* Pagination */
 .products .pagination {
   display: flex;
   justify-content: center;
@@ -136,12 +152,13 @@
   background: #fff;
   cursor: pointer;
   border-radius: 4px;
-  transition: background .2s ease, color .2s ease;
+  transition: background .2s ease, color .2s ease, transform .15s ease;
 }
 
 .products .pagination button:hover {
   background: #f8b400;
   color: #fff;
+  transform: scale(1.05);
 }
 
 .products .pagination button.active {
@@ -155,7 +172,7 @@
   cursor: not-allowed;
 }
 
-/* ===== Responsive ===== */
+/* Responsive */
 @media (max-width: 1200px) {
   .products .products-grid {
     grid-template-columns: repeat(3, 1fr);
