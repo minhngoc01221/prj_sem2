@@ -1,54 +1,38 @@
 import React, { useEffect, useState, useContext } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { FaTruck, FaDollarSign, FaHeadphones, FaWallet } from "react-icons/fa";
 import "../css/ProductDetail.css";
 import { CartContext } from "../context/CartContext";
 
-const fallbackImages = [
-  "/image/product1.jpg",
-  "/image/product2.jpg",
-  "/image/product3.jpg",
-  "/image/product4.jpg",
-  "/image/product5.jpg",
-  "/image/product6.jpg",
-];
-
 const ProductDetail = () => {
   const { id } = useParams();
-  const [product, setProduct] = useState(null);
-  const [quantity, setQuantity] = useState(1);
+  const location = useLocation();
   const { addToCart } = useContext(CartContext);
 
+  const [product, setProduct] = useState(location.state?.product || null);
+  const [quantity, setQuantity] = useState(1);
+
   useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        const res = await fetch(`http://localhost:8000/api/products/${id}`);
-        if (!res.ok) throw new Error("Failed to fetch product");
-        const data = await res.json();
-
-        // ✅ Nếu không có thumbnail thì gán ảnh fallback
-        const randomImage =
-          data.thumbnail ||
-          fallbackImages[(parseInt(id, 10) - 1) % fallbackImages.length];
-
-        setProduct({ ...data, thumbnail: randomImage });
-      } catch (err) {
-        console.error("Error fetching product:", err);
-      }
-    };
-    fetchProduct();
-  }, [id]);
+    if (!product) {
+      const fetchProduct = async () => {
+        try {
+          const res = await fetch(`http://localhost:8000/api/products/${id}`);
+          if (!res.ok) throw new Error("Failed to fetch product");
+          const data = await res.json();
+          setProduct(data);
+        } catch (err) {
+          console.error("Error fetching product:", err);
+        }
+      };
+      fetchProduct();
+    }
+  }, [id, product]);
 
   if (!product) return <p className="loading">Loading product...</p>;
-
-  const handleAddToCart = () => {
-    addToCart(product, quantity);
-  };
 
   return (
     <>
       <section className="product-detail">
-        {/* LEFT: hình ảnh */}
         <div className="detail-left">
           <div className="detail-img">
             <img
@@ -59,12 +43,9 @@ const ProductDetail = () => {
           </div>
         </div>
 
-        {/* RIGHT: thông tin */}
         <div className="detail-right">
           <h2 className="detail-title">{product.name}</h2>
-          <p className="detail-price">
-            ${Number(product.price).toFixed(2)} USD
-          </p>
+          <p className="detail-price">${Number(product.price).toFixed(2)} USD</p>
           <p className="detail-desc">
             {product.description ||
               "This is a high-quality building product trusted by professionals."}
@@ -80,7 +61,7 @@ const ProductDetail = () => {
             />
           </div>
 
-          <button className="btn-addtocart" onClick={handleAddToCart}>
+          <button className="btn-addtocart" onClick={() => addToCart(product, quantity)}>
             Add to Cart
           </button>
 
@@ -95,26 +76,22 @@ const ProductDetail = () => {
         </div>
       </section>
 
-      {/* Features Section */}
       <section className="features">
         <div className="feature">
           <FaTruck className="feature-icon" />
           <h4>Free shipping</h4>
           <p>Enjoy the convenience of free shipment on all your orders.</p>
         </div>
-
         <div className="feature">
           <FaDollarSign className="feature-icon" />
           <h4>Easy refund</h4>
           <p>Shop with confidence with our easy refund policy.</p>
         </div>
-
         <div className="feature">
           <FaHeadphones className="feature-icon" />
           <h4>Online support</h4>
           <p>Our dedicated support team is just a click away.</p>
         </div>
-
         <div className="feature">
           <FaWallet className="feature-icon" />
           <h4>Flexible payment</h4>

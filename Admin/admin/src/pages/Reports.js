@@ -21,28 +21,28 @@ export default function ReportsPage() {
   const formatUSD = (value) =>
     new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
 
-  const fetchData = async () => {
-    try {
-      if (stats.totalOrders > 0) setRefreshing(true); // Hiện overlay refresh
-      const res = await fetch("http://127.0.0.1:8000/api/reports");
-      const data = await res.json();
-      setStats({
-        totalRevenue: parseFloat(data.totalRevenue ?? 0),
-        totalOrders: data.totalOrders ?? 0,
-        avgOrderValue: parseFloat(data.avgOrderValue ?? 0),
-        newCustomers: data.newCustomers ?? 0,
-        revenueByDate: data.revenueByDate ?? [],
-        ordersByDate: data.ordersByDate ?? [],
-        recentOrders: data.recentOrders ?? []
-      });
-    } catch (error) {
-      console.error("Lỗi khi lấy dữ liệu báo cáo:", error);
-    } finally {
-      setRefreshing(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (stats.totalOrders > 0) setRefreshing(true); // Hiện overlay refresh
+        const res = await fetch("http://127.0.0.1:8000/api/reports");
+        const data = await res.json();
+        setStats({
+          totalRevenue: parseFloat(data.totalRevenue ?? 0),
+          totalOrders: data.totalOrders ?? 0,
+          avgOrderValue: parseFloat(data.avgOrderValue ?? 0),
+          newCustomers: data.newCustomers ?? 0,
+          revenueByDate: data.revenueByDate ?? [],
+          ordersByDate: data.ordersByDate ?? [],
+          recentOrders: data.recentOrders ?? []
+        });
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu báo cáo:", error);
+      } finally {
+        setRefreshing(false);
+      }
+    };
+
     fetchData();
 
     // 🔥 Lắng nghe sự kiện từ Orders.jsx để reload ngay khi có update
@@ -50,7 +50,7 @@ export default function ReportsPage() {
     window.addEventListener("ordersUpdated", reloadListener);
 
     return () => window.removeEventListener("ordersUpdated", reloadListener);
-  }, []);
+  }, [stats.totalOrders]); // thêm phụ thuộc vào totalOrders để refresh overlay đúng
 
   return (
     <div className={`${styles.container} ${refreshing ? styles.refreshing : ""}`}>

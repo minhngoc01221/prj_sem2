@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "../styles/admin.css";
+
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
@@ -7,17 +8,17 @@ const AdminUsers = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [editMode, setEditMode] = useState(false);
 
-  const fetchUsers = async () => {
-    try {
-      const res = await fetch("http://localhost:8000/api/users");
-      const data = await res.json();
-      setUsers(data.data || []);
-    } catch (err) {
-      console.error("Error fetching users:", err);
-    }
-  };
-
+  // Lấy danh sách users
   useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const res = await fetch("http://localhost:8000/api/users");
+        const data = await res.json();
+        setUsers(data.data || []);
+      } catch (err) {
+        console.error("Error fetching users:", err);
+      }
+    };
     fetchUsers();
   }, []);
 
@@ -33,7 +34,12 @@ const AdminUsers = () => {
         }),
       });
       if (!res.ok) throw new Error("Update failed");
-      fetchUsers();
+
+      // Sau khi update thì fetch lại users
+      const res2 = await fetch("http://localhost:8000/api/users");
+      const data2 = await res2.json();
+      setUsers(data2.data || []);
+
       setEditMode(false);
       setSelectedUser(null);
     } catch (err) {

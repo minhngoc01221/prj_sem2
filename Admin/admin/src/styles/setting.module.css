@@ -1,0 +1,43 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #f8f9fa;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.tabHeader {
+  display: flex;
+  gap: 16px;
+  background-color: #faf602;
+  padding: 16px 24px;
+  border-bottom: 2px solid #ccc;
+}
+
+.tabHeader button {
+  background: none;
+  border: none;
+  color: rgb(0, 0, 0);
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.tabHeader button:hover {
+  background-color: #ffffff;
+}
+
+.active {
+  background-color: #4285F4;
+  font-weight: bold;
+  color: #3103ff !important;
+}
+
+.content {
+  flex: 1;
+  padding: 32px;
+  background-color: #fff;
+  overflow-y: auto;
+}

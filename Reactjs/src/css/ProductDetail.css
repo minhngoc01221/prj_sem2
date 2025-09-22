@@ -11,18 +11,33 @@
 /* LEFT: hình ảnh */
 .detail-left {
   display: flex;
-  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .detail-img {
   width: 100%;
-  height: 360px;
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
+  max-width: 360px; /* ✅ giới hạn chiều ngang ảnh */
+  height: 280px; /* ✅ chiều cao cố định để các ảnh đều nhau */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #fff;
   border: 1px solid #eee;
   border-radius: 8px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.detail-img img {
+  max-width: 95%;
+  max-height: 95%;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.detail-img img:hover {
+  transform: scale(1.05);
 }
 
 /* RIGHT: thông tin sản phẩm */
@@ -61,6 +76,11 @@
   padding: 6px 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
+  transition: border-color 0.2s ease;
+}
+.detail-qty input:focus {
+  border-color: #f8b400;
+  outline: none;
 }
 
 /* Button Add to Cart */
@@ -73,36 +93,51 @@
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.25s ease, transform 0.2s ease;
 }
 .btn-addtocart:hover {
   background: #e0a800;
+  transform: scale(1.03);
 }
 
-/* Product Info */
-.detail-info h3 {
-  font-size: 18px;
-  font-weight: 700;
-  margin: 10px 0;
-}
-.detail-info ul {
-  padding-left: 18px;
-  color: #555;
-  font-size: 15px;
-}
-.detail-info li {
-  margin-bottom: 6px;
+.detail-left {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-/* Responsive */
-@media (max-width: 900px) {
-  .product-detail {
-    grid-template-columns: 1fr;
-  }
-  .detail-img {
-    height: 280px;
-  }
+.detail-img {
+  width: 90%; /* ✅ mở rộng box cho đều với cột trái */
+  height: 320px; /* ✅ tăng chiều cao một chút cho cân */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 12px; /* bo tròn mềm hơn */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  margin: 0 auto;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
+
+.detail-img img {
+  max-width: 95%;
+  max-height: 95%;
+  object-fit: contain;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.detail-img:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+}
+
+.detail-img img:hover {
+  transform: scale(1.05);
+}
+
 
 /* ========== FEATURES SECTION ========== */
 .features {
@@ -117,6 +152,10 @@
 
 .feature {
   padding: 20px;
+  transition: transform 0.2s ease;
+}
+.feature:hover {
+  transform: translateY(-4px);
 }
 
 .feature-icon {

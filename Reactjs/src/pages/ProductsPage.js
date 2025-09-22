@@ -22,7 +22,6 @@ const ProductsPage = () => {
   const navigate = useNavigate();
   const { addToCart } = useContext(CartContext);
 
-  // Lấy danh sách sản phẩm từ API
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -30,7 +29,6 @@ const ProductsPage = () => {
         if (!res.ok) throw new Error("Failed to fetch products");
         const data = await res.json();
 
-        // ✅ Nếu sản phẩm không có thumbnail, tự gán ảnh có sẵn
         const withImages = (data.data || []).map((p, idx) => ({
           ...p,
           thumbnail: p.thumbnail || fallbackImages[idx % fallbackImages.length],
@@ -53,7 +51,6 @@ const ProductsPage = () => {
   if (!products.length)
     return <p className="no-products">Không có sản phẩm nào để hiển thị.</p>;
 
-  // Pagination
   const totalPages = Math.ceil(products.length / productsPerPage);
   const indexOfLast = currentPage * productsPerPage;
   const indexOfFirst = indexOfLast - productsPerPage;
@@ -94,7 +91,11 @@ const ProductsPage = () => {
               </button>
               <button
                 className="btn-review"
-                onClick={() => navigate(`/products/${p.id}`)}
+                onClick={() =>
+                  navigate(`/products/${p.id}`, {
+                    state: { product: p }, // ✅ Truyền dữ liệu product sang trang detail
+                  })
+                }
               >
                 Detail
               </button>
@@ -103,7 +104,6 @@ const ProductsPage = () => {
         ))}
       </div>
 
-      {/* Pagination */}
       <div className="pagination">
         <button onClick={() => goToPage(1)} disabled={currentPage === 1}>
           &laquo;&laquo;

@@ -1,28 +1,71 @@
-import React from 'react';
-import '../styles/page.css';
+// src/pages/Settings.js
+import React, { useState } from "react";
+import GeneralSettings from "../components/GeneralSettings";
+import PaymentSettings from "../components/PaymentSettings";
+import ShippingSettings from "../components/ShippingSettings";
+import EmailSettings from "../components/EmailSettings";
+import RolesPermissions from "../components/RolesPermissions";
 
-export default function Settings(){
+import styles from "../styles/setting.module.css";
+
+const SettingsPage = () => {
+  const [activeTab, setActiveTab] = useState("general");
+
+  const renderTab = () => {
+    switch (activeTab) {
+      case "general":
+        return <GeneralSettings />;
+      case "payment":
+        return <PaymentSettings />;
+      case "shipping":
+        return <ShippingSettings />;
+      case "email":
+        return <EmailSettings />;
+      case "roles":
+        return <RolesPermissions />;
+      default:
+        return <GeneralSettings />;
+    }
+  };
+
   return (
-    <div className="page-wrapper">
-      <h2 className="page-title">Settings</h2>
-      <div className="card settings-card">
-        <div className="form-row">
-          <label>Site name</label>
-          <input defaultValue="My Company" />
-        </div>
-        <div className="form-row">
-          <label>Admin email</label>
-          <input defaultValue="admin@example.com" />
-        </div>
-        <div className="form-row">
-          <label>Password</label>
-          <input type="password" defaultValue="password123" />
-        </div>
-        <div className="form-actions">
-          <button className="btn">Cancel</button>
-          <button className="btn primary">Save changes</button>
-        </div>
+    <div className={styles.container}>
+      <div className={styles.tabHeader}>
+        <button
+          className={activeTab === "general" ? styles.active : ""}
+          onClick={() => setActiveTab("general")}
+        >
+          General
+        </button>
+        <button
+          className={activeTab === "payment" ? styles.active : ""}
+          onClick={() => setActiveTab("payment")}
+        >
+          Payment
+        </button>
+        <button
+          className={activeTab === "shipping" ? styles.active : ""}
+          onClick={() => setActiveTab("shipping")}
+        >
+          Shipping
+        </button>
+        <button
+          className={activeTab === "email" ? styles.active : ""}
+          onClick={() => setActiveTab("email")}
+        >
+          Email
+        </button>
+        <button
+          className={activeTab === "roles" ? styles.active : ""}
+          onClick={() => setActiveTab("roles")}
+        >
+          Roles
+        </button>
       </div>
+
+      <main className={styles.content}>{renderTab()}</main>
     </div>
   );
-}
+};
+
+export default SettingsPage;
