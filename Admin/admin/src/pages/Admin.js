@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "../styles/admin.css";
+import styles from "../styles/admin.module.css";
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
@@ -8,7 +8,6 @@ const AdminUsers = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [editMode, setEditMode] = useState(false);
 
-  // Lấy danh sách users
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -25,21 +24,22 @@ const AdminUsers = () => {
   const handleSave = async () => {
     if (!selectedUser) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/users/${selectedUser.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          role: selectedUser.role,
-          status: selectedUser.status,
-        }),
-      });
+      const res = await fetch(
+        `http://localhost:8000/api/users/${selectedUser.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            role: selectedUser.role,
+            status: selectedUser.status,
+          }),
+        }
+      );
       if (!res.ok) throw new Error("Update failed");
 
-      // Sau khi update thì fetch lại users
       const res2 = await fetch("http://localhost:8000/api/users");
       const data2 = await res2.json();
       setUsers(data2.data || []);
-
       setEditMode(false);
       setSelectedUser(null);
     } catch (err) {
@@ -56,17 +56,20 @@ const AdminUsers = () => {
   });
 
   return (
-    <div className="admin-users">
+    <div className={styles.adminUsers}>
       <h2>Admin Users</h2>
-      {/* Bộ lọc */}
-      <div className="filters">
+
+      <div className={styles.filters}>
         <input
           type="text"
           placeholder="Search users..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
+        <select
+          value={roleFilter}
+          onChange={(e) => setRoleFilter(e.target.value)}
+        >
           <option value="">All roles</option>
           <option value="Owner">Owner</option>
           <option value="Admin">Admin</option>
@@ -76,8 +79,7 @@ const AdminUsers = () => {
         <button onClick={() => setRoleFilter("")}>Clear</button>
       </div>
 
-      {/* Bảng users */}
-      <table className="users-table">
+      <table className={styles.usersTable}>
         <thead>
           <tr>
             <th>#</th>
@@ -96,23 +98,40 @@ const AdminUsers = () => {
               <td>{u.email}</td>
               <td>{u.role}</td>
               <td>
-                <span className={`badge ${u.status === "Active" ? "active" : "inactive"}`}>
+                <span
+                  className={`${styles.badge} ${
+                    u.status === "Active" ? styles.active : styles.inactive
+                  }`}
+                >
                   {u.status}
                 </span>
               </td>
               <td>
-                <button onClick={() => { setSelectedUser(u); setEditMode(false); }}>View</button>
-                <button onClick={() => { setSelectedUser(u); setEditMode(true); }}>Edit</button>
+                <button
+                  onClick={() => {
+                    setSelectedUser(u);
+                    setEditMode(false);
+                  }}
+                >
+                  View
+                </button>
+                <button
+                  onClick={() => {
+                    setSelectedUser(u);
+                    setEditMode(true);
+                  }}
+                >
+                  Edit
+                </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      {/* Modal hiển thị chi tiết / edit */}
       {selectedUser && (
-        <div className="modal">
-          <div className="modal-content">
+        <div className={styles.modal}>
+          <div className={styles.modalContent}>
             {!editMode ? (
               <>
                 <h3>Thông tin người dùng</h3>
@@ -128,7 +147,9 @@ const AdminUsers = () => {
                 <label>Role:</label>
                 <select
                   value={selectedUser.role}
-                  onChange={(e) => setSelectedUser({ ...selectedUser, role: e.target.value })}
+                  onChange={(e) =>
+                    setSelectedUser({ ...selectedUser, role: e.target.value })
+                  }
                 >
                   <option value="Owner">Owner</option>
                   <option value="Admin">Admin</option>
@@ -138,7 +159,9 @@ const AdminUsers = () => {
                 <label>Status:</label>
                 <select
                   value={selectedUser.status}
-                  onChange={(e) => setSelectedUser({ ...selectedUser, status: e.target.value })}
+                  onChange={(e) =>
+                    setSelectedUser({ ...selectedUser, status: e.target.value })
+                  }
                 >
                   <option value="Active">Active</option>
                   <option value="Inactive">Inactive</option>

@@ -1,0 +1,145 @@
+.adminUsers {
+  padding: 25px;
+  background: #fdfcf7;
+  min-height: 100vh;
+  font-family: "Segoe UI", sans-serif;
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+.adminUsers h2 {
+  font-size: 1.9rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #222;
+  border-left: 6px solid #ffc107;
+  padding-left: 12px;
+  animation: fadeInDown 0.5s ease;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.filters input,
+.filters select {
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.filters input:focus,
+.filters select:focus {
+  outline: none;
+  border-color: #ffc107;
+  box-shadow: 0 0 6px rgba(255, 193, 7, 0.4);
+}
+
+.filters button {
+  padding: 10px 18px;
+  background-color: #ffc107;
+  color: #000;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.3s ease;
+}
+
+.filters button:hover {
+  background-color: #ffda47;
+  transform: translateY(-2px);
+}
+
+.usersTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.08);
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.usersTable th,
+.usersTable td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #f1f1f1;
+  text-align: left;
+}
+
+.usersTable th {
+  background: #000;
+  color: #ffc107;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+.usersTable tr:hover td {
+  background-color: #fff8e1;
+  transform: scale(1.01);
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  border-radius: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.active {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.inactive {
+  background-color: #333;
+  color: #fff;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s ease-in-out;
+  z-index: 999;
+}
+
+.modalContent {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  width: 420px;
+  max-width: 90%;
+  box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

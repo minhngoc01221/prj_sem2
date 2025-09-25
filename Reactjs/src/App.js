@@ -15,7 +15,7 @@ import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import ReviewsPage from "./pages/ReviewPage";
-import Orders from "./pages/Orders"; // Nếu bạn có trang Orders cho Admin/User
+import MyOrderPage from "./pages/MyOrderPage"; // ✅ Đổi thành MyOrderPage
 
 // Layout
 import Navbar from "./components/Navbar";
@@ -70,12 +70,12 @@ function App() {
               <Route path="/login" element={<LoginPage setRole={setRole} />} />
               <Route path="/register" element={<RegisterPage />} />
 
-              {/* ✅ Trang yêu cầu đăng nhập */}
+              {/* ✅ Trang MyOrder chỉ cho phép user đã login */}
               <Route
-                path="/orders"
+                path="/myorder"
                 element={
                   <ProtectedRoute allowedRoles={["Customer", "Admin", "Owner"]}>
-                    <Orders />
+                    <MyOrderPage />
                   </ProtectedRoute>
                 }
               />
