@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -63,7 +64,7 @@ class OrderController extends Controller
                 $total += $linePrice;
             }
 
-            $order->update(['total' => $total + 5]);
+            $order->update(['total' => $total + 5]); // thêm phí ship cố định
         });
 
         return response()->json(
@@ -72,7 +73,6 @@ class OrderController extends Controller
         );
     }
 
-    // ✅ Cập nhật trạng thái đơn hàng + trả dữ liệu dashboard mới
     public function updateStatus(Request $request, $id)
     {
         $request->validate(['status' => 'required|string']);
@@ -82,13 +82,8 @@ class OrderController extends Controller
         $todayStart = now()->startOfDay();
         $todayEnd = now()->endOfDay();
 
-        $totalOrdersToday = Order::whereIn('status', ['Fulfilled', 'Processing'])
-            ->whereBetween('created_at', [$todayStart, $todayEnd])
-            ->count();
-
-        $totalRevenueToday = Order::whereIn('status', ['Fulfilled', 'Processing'])
-            ->whereBetween('created_at', [$todayStart, $todayEnd])
-            ->sum('total');
+        $totalOrdersToday = Order::whereBetween('created_at', [$todayStart, $todayEnd])->count();
+        $totalRevenueToday = Order::whereBetween('created_at', [$todayStart, $todayEnd])->sum('total');
 
         return response()->json([
             'success' => true,
@@ -96,6 +91,63 @@ class OrderController extends Controller
             'order' => $order,
             'totalOrdersToday' => $totalOrdersToday,
             'totalRevenueToday' => $totalRevenueToday,
+        ]);
+    }
+
+    // 🆕 API báo cáo cho trang ReportsPage.jsx
+    public function reports(Request $request)
+    {
+        $range = $request->query('range', 'daily'); // daily | weekly | monthly
+
+        // 1️⃣ Tổng quan hôm nay
+        $todayStart = now()->startOfDay();
+        $todayEnd = now()->endOfDay();
+
+        $todayOrders = Order::whereBetween('created_at', [$todayStart, $todayEnd])->get();
+
+        $totalRevenue = $todayOrders->sum('total');
+        $totalOrders = $todayOrders->count();
+        $avgOrderValue = $totalOrders > 0 ? round($totalRevenue / $totalOrders, 2) : 0;
+
+        $newCustomers = User::whereBetween('created_at', [$todayStart, $todayEnd])->count();
+
+        // 2️⃣ Doanh thu và số đơn theo thời gian
+        if ($range === 'weekly') {
+            $revenueByDate = Order::selectRaw('YEARWEEK(created_at) as date, SUM(total) as revenue')
+                ->groupBy('date')->orderBy('date')->get();
+            $ordersByDate = Order::selectRaw('YEARWEEK(created_at) as date, COUNT(*) as orders')
+                ->groupBy('date')->orderBy('date')->get();
+        } elseif ($range === 'monthly') {
+            $revenueByDate = Order::selectRaw('DATE_FORMAT(created_at, "%Y-%m") as date, SUM(total) as revenue')
+                ->groupBy('date')->orderBy('date')->get();
+            $ordersByDate = Order::selectRaw('DATE_FORMAT(created_at, "%Y-%m") as date, COUNT(*) as orders')
+                ->groupBy('date')->orderBy('date')->get();
+        } else {
+            $revenueByDate = Order::selectRaw('DATE(created_at) as date, SUM(total) as revenue')
+                ->groupBy('date')->orderBy('date')->get();
+            $ordersByDate = Order::selectRaw('DATE(created_at) as date, COUNT(*) as orders')
+                ->groupBy('date')->orderBy('date')->get();
+        }
+
+        // 3️⃣ Đơn hàng gần đây hôm nay
+        $recentOrders = $todayOrders->map(function ($order) {
+            return [
+                'id' => $order->id,
+                'customer' => $order->user->name ?? 'Khách lạ',
+                'date' => $order->created_at->format('Y-m-d'),
+                'total' => $order->total,
+                'status' => $order->status,
+            ];
+        });
+
+        return response()->json([
+            'totalRevenue' => $totalRevenue,
+            'totalOrders' => $totalOrders,
+            'avgOrderValue' => $avgOrderValue,
+            'newCustomers' => $newCustomers,
+            'revenueByDate' => $revenueByDate,
+            'ordersByDate' => $ordersByDate,
+            'recentOrders' => $recentOrders,
         ]);
     }
 }
