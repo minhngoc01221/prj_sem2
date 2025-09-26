@@ -1,147 +1,195 @@
+/* Container */
 .myorder-container {
-  max-width: 900px;
-  margin: 50px auto;
+  max-width: 1100px;
+  margin: 30px auto;
   padding: 20px;
-  animation: fadeIn 0.4s ease-in-out;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  animation: fadeIn 0.5s ease;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(15px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
+/* Tiêu đề */
 .myorder-title {
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 700;
-  margin-bottom: 25px;
-  text-align: center;
   color: #222;
+  margin-bottom: 20px;
+  text-align: center;
+  border-bottom: 3px solid #f0ad00;
+  padding-bottom: 10px;
 }
 
+/* Thông tin user */
 .user-info {
-  background: #ffffff;
-  padding: 18px 22px;
-  border-radius: 10px;
-  margin-bottom: 25px;
+  background: #f9f9f9;
+  padding: 15px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 4px solid #f0ad00;
+}
+.user-info p {
+  margin: 5px 0;
   font-size: 16px;
-  line-height: 1.6;
-  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.05);
-  border: 1px solid #eee;
-  animation: fadeIn 0.6s ease-in-out;
+  color: #444;
 }
 
+/* Loading & Empty */
+.myorder-loading,
 .no-orders {
   text-align: center;
   font-size: 18px;
-  color: #777;
+  color: #666;
   margin-top: 30px;
-  font-style: italic;
 }
 
+/* Bảng đơn hàng */
 .order-table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  background: white;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.08);
-  animation: fadeIn 0.8s ease-in-out;
+  border-collapse: collapse;
+  margin-top: 15px;
 }
 
-.order-table th {
-  background: #fafafa;
-  font-weight: 600;
-  padding: 14px 10px;
-  text-align: center;
-  border-bottom: 1px solid #ddd;
-  font-size: 15px;
-  color: #333;
+.order-table thead {
+  background: #f0ad00;
+  color: #fff;
 }
 
+.order-table th,
 .order-table td {
-  padding: 14px 10px;
+  padding: 12px 15px;
   text-align: center;
+  border-bottom: 1px solid #eee;
   font-size: 15px;
-  border-bottom: 1px solid #f0f0f0;
-  transition: background 0.2s ease, transform 0.2s ease;
 }
 
-.order-table tr:hover td {
+.order-table tbody tr:hover {
   background: #f9f9f9;
-  transform: scale(1.01);
+  transition: 0.3s;
 }
 
-.order-total {
-  font-weight: bold;
-  font-size: 16px;
-  color: #000;
-}
-
-/* =====================
-   TRẠNG THÁI ĐƠN HÀNG
-===================== */
+/* Trạng thái đơn hàng */
 .status {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
   font-weight: 600;
-}
-
-/* 🟡 Processing */
-.status.processing::before {
-  content: "";
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #ff9800;
-  animation: pulse 1.2s infinite;
-}
-
-/* ✅ Fulfilled */
-.status.fulfilled::before {
-  content: "✔";
-  font-size: 12px;
-  color: #2e7d32;
-}
-
-/* ❌ Cancelled */
-.status.cancelled::before {
-  content: "✖";
-  font-size: 12px;
-  color: #d32f2f;
-}
-
-.status.processing {
-  color: #ff9800;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 14px;
 }
 
 .status.fulfilled {
-  color: #2e7d32;
+  background: #d4edda;
+  color: #155724;
+}
+
+.status.pending {
+  background: #fff3cd;
+  color: #856404;
 }
 
 .status.cancelled {
-  color: #d32f2f;
+  background: #f8d7da;
+  color: #721c24;
 }
 
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 0.8;
-  }
-  50% {
-    transform: scale(1.4);
-    opacity: 0.4;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 0.8;
-  }
+/* Nút */
+button {
+  padding: 8px 14px;
+  background: #f0ad00;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #000;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background: #d99a00;
+  transform: scale(1.05);
+}
+
+/* Modal overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* Modal content */
+.modal-content {
+  background: #fff;
+  padding: 25px 30px;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+  animation: slideUp 0.4s ease;
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  font-size: 22px;
+  color: #222;
+  border-bottom: 2px solid #f0ad00;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+/* Bảng sản phẩm trong modal */
+.order-items {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.order-items th {
+  background: #f0f0f0;
+  padding: 10px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.order-items td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  text-align: center;
+}
+
+.order-items tr:hover {
+  background: #fafafa;
+}
+
+/* Nút đóng modal */
+.close-btn {
+  display: block;
+  margin: 20px auto 0;
+  background: #f0ad00;
+  color: #000;
+  font-weight: bold;
+  padding: 10px 20px;
+  border-radius: 8px;
+}
+
+.close-btn:hover {
+  background: #d99a00;
+  transform: scale(1.05);
+}
+
+/* Hiệu ứng */
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+
+@keyframes slideUp {
+  from {transform: translateY(40px); opacity: 0;}
+  to {transform: translateY(0); opacity: 1;}
 }

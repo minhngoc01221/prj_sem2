@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import styles from "./GeneralSettings.module.css";
 
@@ -7,42 +7,68 @@ const GeneralSettings = () => {
     company_name: "",
     logo: null,
     address: "",
-    timezone: "Viet Nam",
   });
+  const [logoPreview, setLogoPreview] = useState(null);
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
+  // ✅ Load dữ liệu ban đầu
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await axios.get("http://localhost:8000/api/settings/general");
+        const data = res.data;
+        setForm({
+          company_name: data.company_name || "",
+          logo: null,
+          address: data.address || "",
+        });
+        setLogoPreview(data.logo || null);
+      } catch (err) {
+        console.error("Failed to load settings", err);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  // ✅ Xử lý thay đổi input
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    setForm({
-      ...form,
-      [name]: files ? files[0] : value,
-    });
+    if (files) {
+      setForm({ ...form, [name]: files[0] });
+      setLogoPreview(URL.createObjectURL(files[0]));
+    } else {
+      setForm({ ...form, [name]: value });
+    }
     setError("");
     setSuccess("");
   };
 
+  // ✅ Submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!form.company_name || !form.address || !form.timezone) {
-      setError("Please fill in all fields.");
-      return;
-    }
 
     try {
       setLoading(true);
       const data = new FormData();
-      data.append("company_name", form.company_name);
-      data.append("logo", form.logo);
-      data.append("address", form.address);
-      data.append("timezone", form.timezone);
 
-      await axios.post("http://localhost:8000/api/settings/general", data);
-      setSuccess("General settings saved!");
+      // luôn gửi các field, ngay cả khi rỗng
+      data.append("company_name", form.company_name || "");
+      data.append("address", form.address || "");
+      if (form.logo) {
+        data.append("logo", form.logo);
+      }
+
+      const res = await axios.post("http://localhost:8000/api/settings/general", data, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      setSuccess(res.data.message || "General settings saved!");
+      setError("");
     } catch (err) {
+      console.error("Save error:", err.response ? err.response.data : err);
       setError("Failed to save settings.");
     } finally {
       setLoading(false);
@@ -75,6 +101,11 @@ const GeneralSettings = () => {
             accept="image/*"
             onChange={handleChange}
           />
+          {logoPreview && (
+            <div className={styles.logoPreview}>
+              <img src={logoPreview} alt="Logo Preview" height="80" />
+            </div>
+          )}
         </div>
 
         <div className={styles.formGroup}>
@@ -87,20 +118,6 @@ const GeneralSettings = () => {
             value={form.address}
             onChange={handleChange}
           />
-        </div>
-
-        <div className={styles.formGroup}>
-          <label className={styles.label}>Timezone</label>
-          <select
-            className={styles.input}
-            name="timezone"
-            value={form.timezone}
-            onChange={handleChange}
-          >
-            <option value="Viet Nam">Viet Nam</option>
-            <option value="UTC">UTC</option>
-            <option value="Asia/Bangkok">Asia/Bangkok</option>
-          </select>
         </div>
 
         {error && <p className={styles.error}>{error}</p>}

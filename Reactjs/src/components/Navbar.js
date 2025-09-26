@@ -1,19 +1,67 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { NavLink, Link } from "react-router-dom";
 import "../css/Navbar.css";
 import { CartContext } from "../context/CartContext";
+import axios from "axios";
 
 const Navbar = ({ role = "guest", onLogout }) => {
   const isLoggedIn = role !== "guest";
   const { cart } = useContext(CartContext);
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
+  const [settings, setSettings] = useState({
+    company_name: "DMN Store",
+    logo: null,
+  });
+
+  // ✅ Lấy dữ liệu settings từ API
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const fetchSettings = async () => {
+      try {
+        const res = await axios.get("http://localhost:8000/api/settings/general", {
+          signal: controller.signal,
+        });
+        setSettings({
+          company_name: res.data.company_name || "DMN Store",
+          logo: res.data.logo || null,
+        });
+      } catch (err) {
+        if (!axios.isCancel(err)) {
+          console.error("Failed to load settings", err);
+        }
+      }
+    };
+
+    fetchSettings();
+    return () => controller.abort();
+  }, []);
+
   return (
     <header className="navbar">
       {/* Logo */}
       <div className="logo">
-        <Link to="/" className="logo-link">
-          <span className="logo-highlight">DMN</span> Store
+        <Link
+          to="/"
+          className="logo-link"
+          style={{ display: "flex", alignItems: "center", gap: "8px" }}
+        >
+          {settings.logo ? (
+            <img
+              src={settings.logo}
+              alt="Logo"
+              style={{ height: "36px", objectFit: "contain" }}
+              onError={(e) => {
+                e.target.style.display = "none"; // ẩn ảnh nếu lỗi
+                setSettings((prev) => ({ ...prev, logo: null }));
+              }}
+            />
+          ) : (
+            <span className="logo-highlight">DMN</span>
+          )}
+
+          <span>{settings.company_name || "DMN Store"}</span>
         </Link>
       </div>
 
@@ -38,7 +86,7 @@ const Navbar = ({ role = "guest", onLogout }) => {
 
           {isLoggedIn && (
             <>
-              {/* Giữ nguyên Cart */}
+              {/* Cart */}
               <li className="cart-link-wrapper">
                 <NavLink to="/cart" className="nav-link">
                   Cart
@@ -48,17 +96,20 @@ const Navbar = ({ role = "guest", onLogout }) => {
                 </NavLink>
               </li>
 
-              {/* Giữ nguyên Review */}
+              {/* Review */}
               <li>
                 <NavLink to="/reviews" className="nav-link">
                   Review
                 </NavLink>
               </li>
 
-              {/* ✅ MyOrder với logo SVG */}
+              {/* My Orders */}
               <li>
-                <NavLink to="/myorder" className="nav-link" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                  {/* Icon hộp hàng */}
+                <NavLink
+                  to="/myorder"
+                  className="nav-link"
+                  style={{ display: "flex", alignItems: "center", gap: "6px" }}
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="22"

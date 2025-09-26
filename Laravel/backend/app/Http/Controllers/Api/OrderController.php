@@ -8,14 +8,25 @@ use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class OrderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(
-            Order::with(['user', 'items.product'])->latest()->paginate(20)
-        );
+        $query = Order::with(['user', 'items.product'])->latest();
+
+        if ($request->has('userId')) {
+            $query->where('user_id', $request->userId);
+        }
+
+        if ($request->boolean('checkOnly')) {
+            return response()->json([
+                'hasOrders' => $query->exists()
+            ]);
+        }
+
+        return response()->json($query->paginate(20));
     }
 
     public function show($id)
@@ -64,7 +75,7 @@ class OrderController extends Controller
                 $total += $linePrice;
             }
 
-            $order->update(['total' => $total + 5]); // thêm phí ship cố định
+            $order->update(['total' => $total + 5]);
         });
 
         return response()->json(
@@ -79,8 +90,8 @@ class OrderController extends Controller
         $order = Order::findOrFail($id);
         $order->update(['status' => $request->status]);
 
-        $todayStart = now()->startOfDay();
-        $todayEnd = now()->endOfDay();
+        $todayStart = Carbon::now('Asia/Ho_Chi_Minh')->startOfDay();
+        $todayEnd   = Carbon::now('Asia/Ho_Chi_Minh')->endOfDay();
 
         $totalOrdersToday = Order::whereBetween('created_at', [$todayStart, $todayEnd])->count();
         $totalRevenueToday = Order::whereBetween('created_at', [$todayStart, $todayEnd])->sum('total');
@@ -94,14 +105,13 @@ class OrderController extends Controller
         ]);
     }
 
-    // 🆕 API báo cáo cho trang ReportsPage.jsx
     public function reports(Request $request)
     {
-        $range = $request->query('range', 'daily'); // daily | weekly | monthly
+        $range = $request->query('range', 'daily');
 
-        // 1️⃣ Tổng quan hôm nay
-        $todayStart = now()->startOfDay();
-        $todayEnd = now()->endOfDay();
+        // ✅ Sửa timezone chuẩn cho VN
+        $todayStart = Carbon::now('Asia/Ho_Chi_Minh')->startOfDay();
+        $todayEnd   = Carbon::now('Asia/Ho_Chi_Minh')->endOfDay();
 
         $todayOrders = Order::whereBetween('created_at', [$todayStart, $todayEnd])->get();
 
@@ -111,7 +121,6 @@ class OrderController extends Controller
 
         $newCustomers = User::whereBetween('created_at', [$todayStart, $todayEnd])->count();
 
-        // 2️⃣ Doanh thu và số đơn theo thời gian
         if ($range === 'weekly') {
             $revenueByDate = Order::selectRaw('YEARWEEK(created_at) as date, SUM(total) as revenue')
                 ->groupBy('date')->orderBy('date')->get();
@@ -129,16 +138,13 @@ class OrderController extends Controller
                 ->groupBy('date')->orderBy('date')->get();
         }
 
-        // 3️⃣ Đơn hàng gần đây hôm nay
-        $recentOrders = $todayOrders->map(function ($order) {
-            return [
-                'id' => $order->id,
-                'customer' => $order->user->name ?? 'Khách lạ',
-                'date' => $order->created_at->format('Y-m-d'),
-                'total' => $order->total,
-                'status' => $order->status,
-            ];
-        });
+        $recentOrders = $todayOrders->map(fn($order) => [
+            'id' => $order->id,
+            'customer' => $order->user->name ?? 'Khách lạ',
+            'date' => $order->created_at->format('Y-m-d'),
+            'total' => $order->total,
+            'status' => $order->status,
+        ]);
 
         return response()->json([
             'totalRevenue' => $totalRevenue,

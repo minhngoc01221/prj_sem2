@@ -22,7 +22,6 @@ export default function ReportsPage() {
   const formatUSD = (value) =>
     new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
 
-  // ✅ fetchData không phụ thuộc vào stats -> không warning nữa
   const fetchData = useCallback(async () => {
     try {
       setRefreshing(true);
@@ -43,7 +42,7 @@ export default function ReportsPage() {
     } finally {
       setRefreshing(false);
     }
-  }, [range]); // 👈 chỉ phụ thuộc range
+  }, [range]);
 
   useEffect(() => {
     fetchData();
@@ -52,6 +51,17 @@ export default function ReportsPage() {
     window.addEventListener("ordersUpdated", reloadListener);
     return () => window.removeEventListener("ordersUpdated", reloadListener);
   }, [fetchData]);
+
+  // ✅ Hàm lọc top 5
+  const getTopData = (data, key = "revenue") => {
+    if (range === "weekly" || range === "monthly") {
+      return [...data]
+        .sort((a, b) => b[key] - a[key]) // sort giảm dần theo doanh thu / orders
+        .slice(0, 5)                     // lấy top 5
+        .sort((a, b) => new Date(a.date) - new Date(b.date)); // sắp lại theo ngày
+    }
+    return data;
+  };
 
   return (
     <div className={`${styles.container} ${refreshing ? styles.refreshing : ""}`}>
@@ -81,7 +91,7 @@ export default function ReportsPage() {
         <div className={styles.chartWrapper}>
           <h2>Doanh thu theo {range === "daily" ? "ngày" : range === "weekly" ? "tuần" : "tháng"}</h2>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={stats.revenueByDate}>
+            <LineChart data={getTopData(stats.revenueByDate, "revenue")}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
               <YAxis />
@@ -94,7 +104,7 @@ export default function ReportsPage() {
         <div className={styles.chartWrapper}>
           <h2>Số đơn hàng theo {range === "daily" ? "ngày" : range === "weekly" ? "tuần" : "tháng"}</h2>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={stats.ordersByDate}>
+            <BarChart data={getTopData(stats.ordersByDate, "orders")}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
               <YAxis />

@@ -1,4 +1,3 @@
-// src/pages/ProductsPage.jsx
 import React, { useEffect, useState } from "react";
 import "../styles/products.css";
 
@@ -13,6 +12,8 @@ const ProductsPage = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [search, setSearch] = useState(""); // 👈 state cho tìm kiếm
 
   // Lấy danh sách sản phẩm
   const fetchProducts = async () => {
@@ -38,7 +39,7 @@ const ProductsPage = () => {
     });
   };
 
-  // Thêm sản phẩm
+  // Thêm hoặc cập nhật sản phẩm
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -51,20 +52,34 @@ const ProductsPage = () => {
     };
 
     try {
-      const res = await fetch("http://localhost:8000/api/products", {
-        method: "POST",
+      const url = editingId
+        ? `http://localhost:8000/api/products/${editingId}`
+        : "http://localhost:8000/api/products";
+
+      const method = editingId ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error("Failed to add product");
+      if (!res.ok)
+        throw new Error(editingId ? "Failed to update product" : "Failed to add product");
 
-      const newProduct = await res.json();
-      setProducts([newProduct, ...products]);
+      const updatedProduct = await res.json();
+
+      if (editingId) {
+        setProducts(products.map((p) => (p.id === editingId ? updatedProduct : p)));
+      } else {
+        setProducts([updatedProduct, ...products]);
+      }
+
       setForm({ name: "", sku: "", price: "", stock: "", thumbnail: "" });
+      setEditingId(null);
     } catch (err) {
-      console.error("Error adding product:", err);
-      setError("Lỗi thêm sản phẩm");
+      console.error("Error saving product:", err);
+      setError(editingId ? "Lỗi cập nhật sản phẩm" : "Lỗi thêm sản phẩm");
     } finally {
       setLoading(false);
     }
@@ -88,13 +103,36 @@ const ProductsPage = () => {
     }
   };
 
+  // Sửa sản phẩm
+  const handleEdit = (product) => {
+    setForm({
+      name: product.name,
+      sku: product.sku,
+      price: product.price,
+      stock: product.stock,
+      thumbnail: product.thumbnail || "",
+    });
+    setEditingId(product.id);
+  };
+
+  // Hủy chế độ edit
+  const handleCancelEdit = () => {
+    setForm({ name: "", sku: "", price: "", stock: "", thumbnail: "" });
+    setEditingId(null);
+  };
+
+  // 🔎 Lọc sản phẩm theo tên hoặc SKU
+  const filteredProducts = products.filter((p) =>
+    `${p.name} ${p.sku}`.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div className="products-page">
       <h2>Admin - Products Management</h2>
 
-      {/* Form thêm sản phẩm */}
+      {/* Form thêm / sửa sản phẩm */}
       <div className="product-card">
-        <h3>Add New Product</h3>
+        <h3>{editingId ? "Edit Product" : "Add New Product"}</h3>
         <form className="product-form" onSubmit={handleSubmit}>
           <input
             type="text"
@@ -135,11 +173,34 @@ const ProductsPage = () => {
             value={form.thumbnail}
             onChange={handleChange}
           />
-          <button type="submit" disabled={loading}>
-            {loading ? "Adding..." : "Add Product"}
-          </button>
+          <div className="form-actions">
+            <button type="submit" disabled={loading}>
+              {loading
+                ? editingId
+                  ? "Updating..."
+                  : "Adding..."
+                : editingId
+                ? "Update Product"
+                : "Add Product"}
+            </button>
+            {editingId && (
+              <button type="button" className="cancel-btn" onClick={handleCancelEdit}>
+                Cancel
+              </button>
+            )}
+          </div>
         </form>
         {error && <p className="error">{error}</p>}
+      </div>
+
+      {/* Bộ lọc tìm kiếm */}
+      <div className="product-search">
+        <input
+          type="text"
+          placeholder="🔍 Tìm kiếm sản phẩm theo tên hoặc SKU..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
       </div>
 
       {/* Bảng sản phẩm */}
@@ -157,24 +218,31 @@ const ProductsPage = () => {
             </tr>
           </thead>
           <tbody>
-            {products.map((p) => (
-              <tr key={p.id}>
-                <td>{p.name}</td>
-                <td>{p.sku}</td>
-                <td>${Number(p.price).toFixed(2)}</td>
-                <td>{p.stock}</td>
-                <td>
-                  {p.thumbnail && (
-                    <img src={p.thumbnail} alt={p.name} width="50" />
-                  )}
-                </td>
-                <td>
-                  <button className="delete-btn" onClick={() => handleDelete(p.id)}>
-                    Delete
-                  </button>
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map((p) => (
+                <tr key={p.id}>
+                  <td>{p.name}</td>
+                  <td>{p.sku}</td>
+                  <td>${Number(p.price).toFixed(2)}</td>
+                  <td>{p.stock}</td>
+                  <td>
+                    {p.thumbnail && <img src={p.thumbnail} alt={p.name} width="50" />}
+                  </td>
+                  <td>
+                    <button className="edit-btn" onClick={() => handleEdit(p)}>Edit</button>
+                    <button className="delete-btn" onClick={() => handleDelete(p.id)}>
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="6" style={{ textAlign: "center", color: "#6b7280" }}>
+                  Không tìm thấy sản phẩm nào.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>

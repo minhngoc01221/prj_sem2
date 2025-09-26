@@ -35,8 +35,6 @@ const Orders = () => {
       const prevStatus = order.status;
       const prevTotal = Number(order.total);
 
-      console.log("🔄 Đổi trạng thái:", prevStatus, "→", newStatus);
-
       const res = await fetch(`http://localhost:8000/api/orders/${id}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -44,15 +42,12 @@ const Orders = () => {
       });
 
       if (!res.ok) throw new Error("Không thể cập nhật trạng thái");
-
       await res.json();
 
-      // ✅ Cập nhật local state
       setOrders((prev) =>
         prev.map((o) => (o.id === id ? { ...o, status: newStatus } : o))
       );
 
-      // ✅ Tính số lượng đơn cần cộng/trừ
       const validStatuses = ["Processing", "Fulfilled"];
       const wasCounted = validStatuses.includes(prevStatus);
       const isCounted = validStatuses.includes(newStatus);
@@ -68,8 +63,6 @@ const Orders = () => {
         change = +1;
         revenueChange = +prevTotal;
       }
-
-      console.log("📢 Gửi sự kiện ordersUpdated:", { change, revenueChange });
 
       window.dispatchEvent(
         new CustomEvent("ordersUpdated", { detail: { change, revenueChange } })
@@ -96,6 +89,7 @@ const Orders = () => {
     <div className={styles.wrapper}>
       <h2 className={styles.title}>Orders Management</h2>
 
+      {/* Bộ lọc */}
       <div className={styles.filters}>
         <input
           type="text"
@@ -119,6 +113,7 @@ const Orders = () => {
         </button>
       </div>
 
+      {/* Bảng đơn hàng */}
       <table className={styles.table}>
         <thead>
           <tr>
@@ -143,7 +138,13 @@ const Orders = () => {
                 <select
                   value={o.status}
                   onChange={(e) => handleStatusChange(o.id, e.target.value)}
-                  className={styles.statusSelect}
+                  className={`${styles.statusSelect} ${
+                    o.status === "Fulfilled"
+                      ? styles.statusFulfilled
+                      : o.status === "Processing"
+                      ? styles.statusProcessing
+                      : styles.statusCancelled
+                  }`}
                 >
                   <option value="Processing">Processing</option>
                   <option value="Fulfilled">Fulfilled</option>
@@ -151,7 +152,10 @@ const Orders = () => {
                 </select>
               </td>
               <td>
-                <button className={styles.viewButton} onClick={() => setSelectedOrder(o)}>
+                <button
+                  className={styles.viewButton}
+                  onClick={() => setSelectedOrder(o)}
+                >
                   View
                 </button>
               </td>
@@ -159,6 +163,57 @@ const Orders = () => {
           ))}
         </tbody>
       </table>
+
+      {/* Modal hiển thị chi tiết */}
+      {selectedOrder && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalBox}>
+            <h3>Order #{selectedOrder.id}</h3>
+            <p><b>Customer:</b> {selectedOrder.user?.name || selectedOrder.customer}</p>
+            <p><b>Email:</b> {selectedOrder.user?.email || "N/A"}</p>
+            <p><b>Payment:</b> {selectedOrder.payment}</p>
+            <p>
+              <b>Status:</b>{" "}
+              <span
+                className={`${styles.badge} ${
+                  selectedOrder.status === "Fulfilled"
+                    ? styles.badgeFulfilled
+                    : selectedOrder.status === "Processing"
+                    ? styles.badgeProcessing
+                    : styles.badgeCancelled
+                }`}
+              >
+                {selectedOrder.status}
+              </span>
+            </p>
+            <p><b>Date:</b> {new Date(selectedOrder.created_at).toLocaleString()}</p>
+
+            <h4>Sản phẩm</h4>
+            <table className={styles.itemsTable}>
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedOrder.items?.map(item => (
+                  <tr key={item.id}>
+                    <td>{item.product?.name}</td>
+                    <td>{item.quantity}</td>
+                    <td>${Number(item.price).toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <p className={styles.total}><b>Total:</b> ${Number(selectedOrder.total).toFixed(2)}</p>
+
+            <button onClick={() => setSelectedOrder(null)}>Đóng</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
