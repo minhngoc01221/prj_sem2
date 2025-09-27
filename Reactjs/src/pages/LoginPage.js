@@ -11,47 +11,56 @@ const LoginPage = ({ setRole }) => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
+ const handleLogin = async (e) => {
+  e.preventDefault();
+  setError("");
 
-    try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
 
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.message || "Login failed");
-      }
-
-      const data = await res.json();
-
-      // ✅ Lưu thông tin vào localStorage
-      localStorage.setItem("userId", data.id);
-      localStorage.setItem("userName", data.name);
-      localStorage.setItem("role", data.role);
-
-      if (remember) {
-        localStorage.setItem("remember", "true");
-      }
-
-      // ✅ Cập nhật role trong state App.js
-      setRole(data.role);
-
-      // ✅ Điều hướng theo role
-      if (data.role === "Owner" || data.role === "Admin") {
-        navigate("/admin"); // Trang admin dashboard
-      } else {
-        navigate("/"); // Trang chủ
-      }
-    } catch (err) {
-      console.error("Login error:", err);
-      setError(err.message);
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.message || "Login failed");
     }
-  };
+
+    const data = await res.json();
+
+    // ✅ Gộp thông tin user thành object và lưu
+    const userData = {
+      id: data.id,
+      name: data.name,
+      role: data.role,
+    };
+    localStorage.setItem("user", JSON.stringify(userData));
+
+    // ✅ Nếu có token từ API thì lưu luôn
+    if (data.token) {
+      localStorage.setItem("token", data.token);
+    }
+
+    if (remember) {
+      localStorage.setItem("remember", "true");
+    }
+
+    // ✅ Cập nhật role trong state App.js
+    setRole(data.role);
+
+    // ✅ Điều hướng theo role
+    if (data.role === "Owner" || data.role === "Admin") {
+      navigate("/admin");
+    } else {
+      navigate("/");
+    }
+  } catch (err) {
+    console.error("Login error:", err);
+    setError(err.message);
+  }
+};
+
 
   return (
     <div className="register-page">

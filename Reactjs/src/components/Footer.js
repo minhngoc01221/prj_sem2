@@ -6,17 +6,17 @@ import "../css/Footer.css";
 const Footer = () => {
   const [settings, setSettings] = useState({
     company_name: "DMN Store",
-    address: "123 Đường X, Quận Y, TP.HCM",
+    address: "123 Street X, District Y, Ho Chi Minh City",
   });
 
-  // Lấy dữ liệu từ API
+  // Fetch data from API
   useEffect(() => {
     const fetchSettings = async () => {
       try {
         const res = await axios.get("http://localhost:8000/api/settings/general");
         setSettings({
           company_name: res.data.company_name || "DMN Store",
-          address: res.data.address || "123 Đường X, Quận Y, TP.HCM",
+          address: res.data.address || "123 Street X, District Y, Ho Chi Minh City",
         });
       } catch (err) {
         console.error("Failed to load settings:", err);
@@ -34,12 +34,12 @@ const Footer = () => {
           <div className="footer-col">
             <h3>About {settings.company_name}</h3>
             <p>
-              Cung cấp vật liệu xây dựng chất lượng cao: xi măng, sắt thép, gạch,
-              cát/đá… Lựa chọn thông minh – Xây dựng bền vững.
+              Providing high-quality construction materials: cement, steel, bricks,
+              sand/stone… Smart choice – Sustainable construction.
             </p>
             <p>
-              Giao nhanh tận nơi, báo giá minh bạch, hỗ trợ kỹ thuật tận tâm cho mọi
-              công trình từ dân dụng đến dự án.
+              Fast delivery, transparent pricing, dedicated technical support for
+              all projects from residential to commercial.
             </p>
           </div>
 
@@ -48,15 +48,15 @@ const Footer = () => {
             <h3>Latest News</h3>
             <ul>
               <li>
-                <Link to="/products?cat=cement">Cập nhật giá xi măng</Link>
+                <Link to="/products?cat=cement">Cement price updates</Link>
                 <span>05 September {new Date().getFullYear()}</span>
               </li>
               <li>
-                <Link to="/reviews">Khách hàng nói gì về {settings.company_name}</Link>
+                <Link to="/reviews">Customer feedback on {settings.company_name}</Link>
                 <span>31 August {new Date().getFullYear()}</span>
               </li>
               <li>
-                <Link to="/products?cat=steel">Bảng giá sắt thép mới</Link>
+                <Link to="/products?cat=steel">New steel price list</Link>
                 <span>20 August {new Date().getFullYear()}</span>
               </li>
             </ul>
@@ -66,17 +66,17 @@ const Footer = () => {
           <div className="footer-col">
             <h3>Services</h3>
             <ul>
-              <li><Link to="/products">Cung ứng vật liệu</Link></li>
-              <li><Link to="/about">Tư vấn kỹ thuật</Link></li>
-              <li><Link to="/cart">Giao hàng tận nơi</Link></li>
-              <li><Link to="/reviews">Bảo hành – Hậu mãi</Link></li>
+              <li><Link to="/products">Material supply</Link></li>
+              <li><Link to="/about">Technical consulting</Link></li>
+              <li><Link to="/cart">Delivery service</Link></li>
+              <li><Link to="/reviews">Warranty & After-sales</Link></li>
             </ul>
           </div>
 
           {/* Get In Touch */}
           <div className="footer-col">
             <h3>Get In Touch</h3>
-            {/* Địa chỉ click được để mở Google Maps */}
+            {/* Address clickable to open Google Maps */}
             <p>
               📍{" "}
               <a
@@ -89,7 +89,7 @@ const Footer = () => {
             </p>
             <p>☎️ 0900 000 000</p>
             <p>✉️ support@dmnstore.vn</p>
-            <p>🕒 08:00 – 17:30 (T2–T7)</p>
+            <p>🕒 08:00 – 17:30 (Mon–Sat)</p>
           </div>
         </div>
 

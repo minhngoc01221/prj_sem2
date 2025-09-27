@@ -8,14 +8,6 @@
   color: #333;
 }
 
-/* FORM */
-.checkout .checkout-form h2 {
-  margin-bottom: 20px;
-  font-size: 26px;
-  font-weight: 800;
-  color: #111;
-}
-
 .checkout .checkout-form input {
   width: 100%;
   padding: 10px;
@@ -25,7 +17,7 @@
   margin-bottom: 12px;
 }
 
-/* ORDER SUMMARY */
+/* ===== ORDER SUMMARY ===== */
 .checkout .checkout-summary {
   background: #f9f9f9;
   border: 1px solid #eee;
@@ -40,7 +32,7 @@
   font-weight: 700;
 }
 
-/* PAYMENT METHOD */
+/* ===== PAYMENT METHOD ===== */
 .payment-method {
   margin: 20px 0;
   display: flex;
@@ -50,8 +42,8 @@
 
 .payment-option {
   display: flex;
-  justify-content: space-between; /* chữ bên trái, radio bên phải */
   align-items: center;
+  justify-content: space-between; /* text/logo bên trái, radio bên phải */
   border: 1px solid #ddd;
   padding: 16px 20px;
   border-radius: 8px;
@@ -94,14 +86,15 @@
   object-fit: contain;
 }
 
-.payment-radio {
-  margin-left: auto;
-  flex-shrink: 0;
-  transform: scale(0);
-  accent-color: #f8b400;
+/* radio nằm hẳn bên phải và rõ ràng */
+.payment-option input[type="radio"] {
+  margin-left: 20px;
+  transform: scale(1.4);      /* phóng to cho dễ click */
+  cursor: pointer;
+  accent-color: #f8b400;      /* màu cam vàng chủ đạo */
 }
 
-/* BUTTON */
+/* ===== BUTTON ===== */
 .btn-placeorder {
   width: 100%;
   padding: 14px;
@@ -112,15 +105,17 @@
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  transition: background 0.2s ease;
 }
 
 .btn-placeorder:hover {
   background: #e0a800;
 }
 
-/* RESPONSIVE */
+/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   .checkout {
     grid-template-columns: 1fr;
   }
 }
+  

@@ -22,11 +22,7 @@ const CheckoutPage = () => {
     city: "",
     phone: "",
     email: "",
-    cardNumber: "",
-    expDate: "",
-    cvc: "",
-    accountName: "",
-    paymentMethod: "credit",
+    paymentMethod: "COD",
   });
 
   const [loading, setLoading] = useState(false);
@@ -37,41 +33,27 @@ const CheckoutPage = () => {
 
   const handlePlaceOrder = async () => {
     const requiredFields = ["firstName", "lastName", "address", "city", "phone", "email"];
-
-    // ✅ Validate thẻ
-    if (form.paymentMethod === "credit") {
-      requiredFields.push("cardNumber", "expDate", "cvc");
-      if (!/^\d{16}$/.test(form.cardNumber)) {
-        alert("❌ Invalid Credit Card number. Must be 16 digits.");
-        return;
-      }
-      if (!/^\d{3}$/.test(form.cvc)) {
-        alert("❌ Invalid CVC. Must be 3 digits.");
-        return;
-      }
-      if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(form.expDate)) {
-        alert("❌ Invalid Expiration Date. Use MM/YY format.");
-        return;
-      }
-    }
-
-    if (form.paymentMethod === "debit") {
-      requiredFields.push("cardNumber", "accountName");
-      if (!/^\d{10,15}$/.test(form.cardNumber)) {
-        alert("❌ Invalid Debit Card number. Must be 10–15 digits.");
-        return;
-      }
-    }
-
     const missing = requiredFields.filter((f) => !form[f].trim());
+
     if (missing.length > 0) {
-      alert(`Please fill in: ${missing.join(", ")}`);
+      alert(`⚠ Vui lòng nhập đầy đủ: ${missing.join(", ")}`);
       return;
     }
 
-    // ✅ Lấy user_id từ LocalStorage
-    const userId = localStorage.getItem("userId");
-    if (!userId) {
+    // ✅ Lấy user từ localStorage (ưu tiên "user", fallback "userId")
+    let user = null;
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      user = JSON.parse(savedUser);
+    } else {
+      const userId = localStorage.getItem("userId");
+      const userName = localStorage.getItem("userName");
+      if (userId && userName) {
+        user = { id: parseInt(userId), name: userName };
+      }
+    }
+
+    if (!user) {
       alert("Bạn cần đăng nhập để đặt hàng!");
       navigate("/login");
       return;
@@ -79,13 +61,15 @@ const CheckoutPage = () => {
 
     setLoading(true);
     try {
-      // ✅ Gửi đúng payload backend yêu cầu
       const res = await fetch("http://localhost:8000/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: parseInt(userId),
+          user_id: user.id,
           payment: form.paymentMethod,
+          address: form.address,
+          city: form.city,
+          phone: form.phone,
           items: cart.map((p) => ({
             product_id: p.id,
             quantity: p.quantity,
@@ -93,14 +77,19 @@ const CheckoutPage = () => {
         }),
       });
 
-      if (!res.ok) throw new Error("Không thể tạo đơn hàng");
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || "Không thể tạo đơn hàng");
+      }
+
       const data = await res.json();
       console.log("✅ Order created:", data);
 
+      localStorage.setItem("lastOrder", JSON.stringify(data));
       clearCart();
       navigate("/payment-success");
     } catch (error) {
-      alert("❌ Thanh toán thất bại, vui lòng thử lại!");
+      alert("❌ Đặt hàng thất bại, vui lòng thử lại!");
       console.error(error);
     } finally {
       setLoading(false);
@@ -119,7 +108,26 @@ const CheckoutPage = () => {
         <input type="email" name="email" placeholder="Email *" value={form.email} onChange={handleChange} />
 
         <h3>Payment Method</h3>
-        {/* ... giữ nguyên phần chọn credit/debit ... */}
+        <label>
+          <input
+            type="radio"
+            name="paymentMethod"
+            value="COD"
+            checked={form.paymentMethod === "COD"}
+            onChange={handleChange}
+          />
+          Thanh toán khi nhận hàng (COD)
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="paymentMethod"
+            value="CreditCard"
+            checked={form.paymentMethod === "CreditCard"}
+            onChange={handleChange}
+          />
+          Thẻ tín dụng
+        </label>
 
         <button className="btn-placeorder" onClick={handlePlaceOrder} disabled={loading}>
           {loading ? "Processing..." : "Place Order"}
